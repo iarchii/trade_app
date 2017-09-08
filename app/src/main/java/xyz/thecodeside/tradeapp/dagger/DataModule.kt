@@ -7,6 +7,7 @@ import android.preference.PreferenceManager
 import dagger.Module
 import dagger.Provides
 import xyz.thecodeside.tradeapp.helpers.Logger
+import xyz.thecodeside.tradeapp.helpers.REST_TOKEN
 import xyz.thecodeside.tradeapp.repository.remote.ApiErrorHandler
 import xyz.thecodeside.tradeapp.repository.remote.rest.RemoteDataSource
 import xyz.thecodeside.tradeapp.repository.remote.rest.RestApiProvider
@@ -20,7 +21,7 @@ class DataModule {
 
     @Provides
     @Singleton
-    fun provideRemoteRepository(): RemoteDataSource = RestApiProvider().provide()
+    fun provideRemoteRepository(): RemoteDataSource = RestApiProvider(REST_TOKEN).provide()
 
     @Provides
     @Singleton

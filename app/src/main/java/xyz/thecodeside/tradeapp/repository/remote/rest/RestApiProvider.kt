@@ -6,15 +6,16 @@ import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import xyz.thecodeside.tradeapp.BuildConfig
-import xyz.thecodeside.tradeapp.helpers.BASE_URL
+import xyz.thecodeside.tradeapp.helpers.REST_API_BASE_URL
 import java.util.concurrent.TimeUnit
 
-class RestApiProvider {
+class RestApiProvider(val token: String) {
     fun provide(): RemoteDataSource {
         val loggingInterceptor = HttpLoggingInterceptor()
         loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
 
         val builder = OkHttpClient.Builder()
+                .addInterceptor(AuthorizationInterceptor(token))
         builder.connectTimeout(5, TimeUnit.SECONDS)
         if (BuildConfig.DEBUG) {
             builder.addInterceptor(loggingInterceptor)
@@ -25,7 +26,7 @@ class RestApiProvider {
         val retrofit: Retrofit = Retrofit.Builder()
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create())
-                .baseUrl(BASE_URL)
+                .baseUrl(REST_API_BASE_URL)
                 .client(client)
                 .build()
 
@@ -33,3 +34,4 @@ class RestApiProvider {
     }
 
 }
+
