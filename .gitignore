@@ -7,3 +7,4 @@
 app/build
 /captures
 /artifactory.properties
+/app/src/main/java/xyz/thecodeside/tradeapp/helpers/Constants.kt
