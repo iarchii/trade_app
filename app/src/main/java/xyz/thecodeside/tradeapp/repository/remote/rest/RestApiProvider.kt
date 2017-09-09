@@ -9,7 +9,7 @@ import xyz.thecodeside.tradeapp.BuildConfig
 import xyz.thecodeside.tradeapp.helpers.REST_API_BASE_URL
 import java.util.concurrent.TimeUnit
 
-class RestApiProvider(val token: String) {
+class RestApiProvider(private val token: String) {
     fun provide(): RemoteDataSource {
         val loggingInterceptor = HttpLoggingInterceptor()
         loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
