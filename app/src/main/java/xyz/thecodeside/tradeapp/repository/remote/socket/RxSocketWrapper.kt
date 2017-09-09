@@ -2,27 +2,37 @@ package xyz.thecodeside.tradeapp.repository.remote.socket
 
 import android.util.Log
 import com.google.gson.Gson
-import com.google.gson.GsonBuilder
 import io.reactivex.Flowable
 import io.reactivex.Single
 import io.reactivex.SingleEmitter
 import io.reactivex.disposables.Disposable
 import io.reactivex.processors.PublishProcessor
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.WebSocket
+import okhttp3.WebSocketListener
 import xyz.thecodeside.tradeapp.helpers.Logger
 import java.net.Socket
 import java.util.concurrent.TimeUnit
 
-class RxSocketWrapper(private val logger: Logger) {
+class RxSocketWrapper(private val logger: Logger
+                      ) : WebSocketListener(){
 
-    private var socket: Socket? = null
-    private var status: Status =Status.DISCONNECTED
-    private val gson =  Gson()
+    private val NORMAL_CLOSURE_STATUS = 1000
+    private val NORMAL_CLOSURE_REASON = "DISCONNECT"
+
+    private val AUTHORIZATION_KEY = "Authorization"
+    private val AUTH_PREFIX = "Bearer "
+
+
+    private var socket: WebSocket? = null
+    private var status: Status = Status.DISCONNECTED
+    private val gson = Gson()
 
     private val stateFlowable = PublishProcessor.create<Status>().toSerialized()
     private val messageFlowable = PublishProcessor.create<String>().toSerialized()
-    private val authStatusFlowable = PublishProcessor.create<AuthStatus>().toSerialized()
 
-    override fun connect(address: String): Flowable<Status> {
+    fun connect(address: String, token: String): Flowable<Status> {
         return Flowable
                 .fromCallable {
                     //reuse existing connection, only really connect if DISCONNECTED
@@ -33,46 +43,45 @@ class RxSocketWrapper(private val logger: Logger) {
                 .flatMap { stateFlowable }
     }
 
-    override fun observeSocketMessages(): Flowable<String> = messageFlowable
+    fun observeSocketMessages(): Flowable<String> = messageFlowable
 
-    override fun disconnect() {
-        /* wait a second before disconnecting the socket, because when a message is sent just before disconnecting the socket,
-         * the socketcluster doesn't send it - it disconnect before it's sent. This is a big problem when resigning from game. */
-        Single.timer(1, TimeUnit.SECONDS)
-                .subscribe({ socket?.disconnect() }, {})
+    fun disconnect() {
+        socket?.close(NORMAL_CLOSURE_STATUS, NORMAL_CLOSURE_REASON)
     }
 
-    override fun send(message: String) {
-        Log.i("Socket    SEND", message)
-        socket?.emit("msg", message)
+    fun send(message: String) {
+        Log.i("Socket  SEND", message)
+        socket?.send(message)
     }
 
-    override fun authorise(token: String): Single<AuthStatus> =
-            Single.fromCallable { socket?.emit("login", token) }
-                    .flatMap({authStatusFlowable.firstOrError()})
+    private fun connectSocket(address: String, token: String){
 
-    private fun connectSocket(address: String) {
-        val socket = Socket(address)
-        socket.setListener(socketClusterListener)
-        socket.disableLogging()
-        socket.connect()
+        val client = OkHttpClient()
+        val request = Request.Builder()
+                .url(address)
+                .addHeader(AUTHORIZATION_KEY, AUTH_PREFIX + token)
+                .build()
+
+        socket = client.newWebSocket(request, this)
+        client.newWebSocket(request, this)
+        client.dispatcher().executorService().shutdown()
     }
 
     val socketClusterListener = object : BasicListener {
 
-        private var  authoriserDisposable: Disposable? = null
+        private var authoriserDisposable: Disposable? = null
 
-        override fun onConnected(newSocket: io.github.sac.Socket, headers: MutableMap<String, MutableList<String>>) {
+        fun onConnected(newSocket: io.github.sac.Socket, headers: MutableMap<String, MutableList<String>>) {
             socket = newSocket
             setStatus(Status.CONNECTED)
             registerAuthStatusListener(newSocket)
         }
 
-        override fun onConnectError(websocket: io.github.sac.Socket, exception: WebSocketException) = reconnect(websocket)
+        fun onConnectError(websocket: io.github.sac.Socket, exception: WebSocketException) = reconnect(websocket)
 
-        override fun onDisconnected(websocket: io.github.sac.Socket?, serverCloseFrame: WebSocketFrame?, clientCloseFrame: WebSocketFrame?, closedByServer: Boolean) {
+        fun onDisconnected(websocket: io.github.sac.Socket?, serverCloseFrame: WebSocketFrame?, clientCloseFrame: WebSocketFrame?, closedByServer: Boolean) {
             when {
-                clientCloseFrame?.closeCode!=WebSocketCloseCode.NORMAL -> reconnect(websocket)
+                clientCloseFrame?.closeCode != WebSocketCloseCode.NORMAL -> reconnect(websocket)
                 else -> clear()
             }
         }
@@ -82,7 +91,7 @@ class RxSocketWrapper(private val logger: Logger) {
                     .subscribe({ websocket?.connect() }, {})
         }
 
-        override fun onAuthentication(socket: io.github.sac.Socket, status: Boolean) {
+        fun onAuthentication(socket: io.github.sac.Socket, status: Boolean) {
             authoriserDisposable = socketAuthoriser
                     .authorise(this@RxSocketClusterWrapperImpl)
                     .subscribe(
@@ -91,8 +100,8 @@ class RxSocketWrapper(private val logger: Logger) {
                     )
         }
 
-        override fun onSetAuthToken(token: String, socket: io.github.sac.Socket) {
-            Log.i("socket","onSetAuthToken")
+        fun onSetAuthToken(token: String, socket: io.github.sac.Socket) {
+            Log.i("socket", "onSetAuthToken")
             socket.setAuthToken(token)
         }
 
@@ -109,7 +118,7 @@ class RxSocketWrapper(private val logger: Logger) {
 
     }
 
-    private fun setStatus(status: Status){
+    private fun setStatus(status: Status) {
         this.status = status
         stateFlowable.onNext(status)
     }
@@ -120,16 +129,16 @@ class RxSocketWrapper(private val logger: Logger) {
         })
     }
 
-    override fun registerUserChannel(channelName: String): Single<Boolean> {
+    fun regŁisterUserChannel(channelName: String): Single<Boolean> {
         var emitter: SingleEmitter<Boolean>? = null
         val observable = Single.create<Boolean> { emitter = it }
 
-        if(socket==null) emitter?.onSuccess(false)
+        if (socket == null) emitter?.onSuccess(false)
 
         val channel = socket?.createChannel(channelName)
         channel?.subscribe { name, error, data ->
             Log.i("channel subscribed", "$name / $error / $data")
-            when(error){
+            when (error) {
                 null -> emitter?.onSuccess(true)
                 else -> emitter?.onSuccess(false)
             }
@@ -140,13 +149,13 @@ class RxSocketWrapper(private val logger: Logger) {
         }
         return observable
     }
-    
+
     enum class Status {
         DISCONNECTED,
         CONNECTING,
         CONNECTED,
         READY
     }
-    
+
 
 }

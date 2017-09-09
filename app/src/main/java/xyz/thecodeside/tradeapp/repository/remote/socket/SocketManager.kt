@@ -4,6 +4,7 @@ import io.reactivex.Completable
 import io.reactivex.Flowable
 import xyz.thecodeside.tradeapp.helpers.Logger
 import xyz.thecodeside.tradeapp.model.BaseSocket
+import xyz.thecodeside.tradeapp.model.SocketRequest
 import java.util.concurrent.TimeUnit
 
 class SocketManager(private val socketAddress: String,
@@ -15,8 +16,8 @@ class SocketManager(private val socketAddress: String,
     private val TIMEOUT_SECONDS = 3L
 
     fun connect(): Completable = socket
-            .connect(socketAddress)
-            .filter { it == RxSocketWrapper.SocketStatus.CONNECTED }
+            .connect(socketAddress, token)
+            .filter { it == RxSocketWrapper.Status.READY }
             .timeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
             .firstOrError()
             .toCompletable()
@@ -29,7 +30,6 @@ class SocketManager(private val socketAddress: String,
 
     fun send(item: SocketRequest) {
         val token = this.token
-        item.setAccessData(token)
         socket.send(packer.pack(item))
     }
 
@@ -53,3 +53,4 @@ class SocketManager(private val socketAddress: String,
 
 
 }
+
