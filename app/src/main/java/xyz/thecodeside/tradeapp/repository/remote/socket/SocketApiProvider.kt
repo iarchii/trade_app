@@ -8,9 +8,8 @@ import xyz.thecodeside.tradeapp.helpers.SOCKET_URL
 class SocketApiProvider(private val logger: Logger) {
     fun provide(): SocketManager  = SocketManager(
             SOCKET_URL,
-            RxSocketWrapper(logger),
+            RxSocketWrapper(logger, SOCKET_TOKEN),
             SocketItemPacker(),
-            SOCKET_TOKEN,
             logger
     )
 

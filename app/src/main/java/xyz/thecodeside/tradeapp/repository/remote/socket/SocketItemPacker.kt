@@ -2,19 +2,16 @@ package xyz.thecodeside.tradeapp.repository.remote.socket
 
 import android.util.Log
 import com.google.gson.Gson
-import org.json.JSONObject
 import xyz.thecodeside.tradeapp.model.BaseSocket
 import xyz.thecodeside.tradeapp.model.SocketTopic
 import xyz.thecodeside.tradeapp.model.TOPIC_NAME
 
 class SocketItemPacker {
 
-    class SocketItemPacker {
-
-        fun pack(item: BaseSocket): JSONObject {
+    fun pack(item: BaseSocket): String {
             val gson = Gson()
             val jsonString = gson.toJson(item, getItemClass(item.topic.name))
-            return JSONObject(jsonString)
+            return jsonString
         }
 
         fun unpack(message: String?): BaseSocket {
@@ -28,9 +25,8 @@ class SocketItemPacker {
 
             return socketItem
         }
-    }
-}
 
+}
 private val socketIdMap = mapOf(
         SocketTopic.CONNECTED.name to BaseSocket::class.java,
         SocketTopic.CONNECTED_FAILED.name to BaseSocket::class.java
