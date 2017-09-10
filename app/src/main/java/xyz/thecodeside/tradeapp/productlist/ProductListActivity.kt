@@ -9,7 +9,7 @@ import xyz.thecodeside.tradeapp.TradeApp
 import xyz.thecodeside.tradeapp.model.Product
 import javax.inject.Inject
 
-class ProductListActivity : AppCompatActivity() {
+class ProductListActivity : AppCompatActivity(), ProductListPresenter.ProductListView {
 
     @Inject lateinit var presenter: ProductListPresenter
     var adapter: ProductListAdapter = ProductListAdapter()
@@ -17,12 +17,19 @@ class ProductListActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_product_list)
-
         TradeApp.baseComponent.inject(this)
-
         setupRecycler()
     }
 
+    override fun onStart() {
+        presenter.attachView(this)
+        super.onStart()
+    }
+
+    override fun onStop() {
+        presenter.detachView()
+        super.onStop()
+    }
 
 
     private fun setupRecycler() {

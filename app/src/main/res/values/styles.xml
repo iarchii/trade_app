@@ -9,5 +9,13 @@
         <item name="android:colorBackground">@android:color/holo_blue_dark</item>
     </style>
 
+    <style name="ProgressSpinner">
+        <item name="android:padding">4dp</item>
+        <item name="android:elevation">4dp</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:layout_width">48dp</item>
+        <item name="android:layout_margin">8dp</item>
+    </style>
+
 
 </resources>
