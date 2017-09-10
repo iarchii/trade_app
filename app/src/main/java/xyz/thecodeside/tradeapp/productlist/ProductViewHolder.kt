@@ -14,12 +14,15 @@ class ProductViewHolder(val clickListener: ProductClickListener,
         this.product = product
 
         itemView.productName.text = product.displayName
-        itemView.productPrice.text = product.currentPrice.amount
-
-
+        itemView.productPrice.text = product.currentPrice.amount.toString()
+        itemView.productDiff.text = calculateDiff(product.currentPrice.amount, product.closingPrice.amount).toString()
         RxView.clicks(itemView).subscribe({
             clickListener.onClick(product)
         })
     }
+
+    private fun calculateDiff(currentPrice: Float, closingPrice: Float): Float =
+            (currentPrice-closingPrice)/closingPrice * 100
+
 
 }

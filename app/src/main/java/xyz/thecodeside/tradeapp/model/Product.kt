@@ -15,12 +15,12 @@ data class Product(
 data class CurrentPrice(
 		var currency: String,// EUR
 		var decimals: Int,// 1
-		var amount: String// 4371.8
+		var amount: Float// 4371.8
 )
 
 @Keep
 data class ClosingPrice(
 		var currency: String,// EUR
 		var decimals: Int,// 1
-		var amount: String// 4216.4
+		var amount: Float// 4216.4
 )
