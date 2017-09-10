@@ -4,6 +4,7 @@ import io.reactivex.Completable
 import io.reactivex.Flowable
 import xyz.thecodeside.tradeapp.helpers.Logger
 import xyz.thecodeside.tradeapp.model.BaseSocket
+import xyz.thecodeside.tradeapp.model.SocketTopic
 import java.util.concurrent.TimeUnit
 
 class SocketManager(private val socketAddress: String,
@@ -11,17 +12,20 @@ class SocketManager(private val socketAddress: String,
                     private val packer: SocketItemPacker,
                     private val logger: Logger) {
 
-    private val TIMEOUT_SECONDS = 3L
+    private val TIMEOUT_SECONDS = 4L
 
     fun connect(): Completable = socket
             .connect(socketAddress)
-            .filter { it == RxSocketWrapper.Status.READY }
+            .filter { isReady(it) }
             .timeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
             .firstOrError()
             .toCompletable()
             .doOnError {
                 disconnect()
             }
+
+    private fun isReady(it: RxSocketWrapper.Status) =
+            it == RxSocketWrapper.Status.READY
 
 
     fun disconnect() = socket.disconnect()
@@ -33,6 +37,22 @@ class SocketManager(private val socketAddress: String,
     fun observe(): Flowable<BaseSocket> = socket
             .observeSocketMessages()
             .flatMap { unpackItem(it) }
+            .map {
+                checkIsReady(it)
+                it
+            }
+
+    private fun checkIsReady(it: BaseSocket) {
+        if (isConnected() && isConnectedMessage(it)) {
+            socket.status = RxSocketWrapper.Status.READY
+        }
+    }
+
+    private fun isConnectedMessage(it: BaseSocket) =
+            it.topic == SocketTopic.CONNECTED
+
+    private fun isConnected() = socket.status == RxSocketWrapper.Status.CONNECTED
+
 
     @Suppress("UNCHECKED_CAST")
     fun <T : BaseSocket> observe(clazz: Class<T>): Flowable<T> = observe()
