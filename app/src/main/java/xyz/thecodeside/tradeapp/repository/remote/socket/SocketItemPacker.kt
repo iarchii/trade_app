@@ -2,9 +2,7 @@ package xyz.thecodeside.tradeapp.repository.remote.socket
 
 import android.util.Log
 import com.google.gson.Gson
-import xyz.thecodeside.tradeapp.model.BaseSocket
-import xyz.thecodeside.tradeapp.model.SocketTopic
-import xyz.thecodeside.tradeapp.model.TOPIC_NAME
+import xyz.thecodeside.tradeapp.model.*
 
 class SocketItemPacker {
 
@@ -19,20 +17,20 @@ class SocketItemPacker {
             val gson = Gson()
 
             val envelopeAsMap = gson.fromJson(message, Map::class.java)
-            val id = envelopeAsMap[TOPIC_NAME] as String? ?: throw IllegalArgumentException("Cannot find id of SocketItem in: $envelopeAsMap")
+            val id = envelopeAsMap[SOCKET_TOPIC_NAME] as String? ?: throw IllegalArgumentException("Cannot find id of SocketItem in: $envelopeAsMap")
 
-            val socketItem = gson.fromJson(message, getItemClass(id))
+            val socketBody = gson.fromJson(envelopeAsMap[SOCKET_BODY_NAME] as String? , getItemClass(id))
 
-            return socketItem
+            return BaseSocket(SocketTopic.valueOf(id), socketBody)
         }
 
 }
 private val socketIdMap = mapOf(
-        SocketTopic.CONNECTED.name to BaseSocket::class.java,
-        SocketTopic.CONNECTED_FAILED.name to BaseSocket::class.java
+        SocketTopic.CONNECTED.name to Connected::class.java,
+        SocketTopic.CONNECTED_FAILED.name to ConnectFailed::class.java
 )
 
-fun getItemClass(id: String): Class<out BaseSocket> = socketIdMap[id] ?: throw IllegalArgumentException("No SocketItem mapping for given id: $id")
-fun getItemId(clazz: Class<out BaseSocket>) = socketIdMap.entries.find { it.value == clazz }?.key ?: throw IllegalArgumentException("No id found for the SocketItem given")
+fun getItemClass(id: String): Class<out BaseSocketBody> = socketIdMap[id] ?: throw IllegalArgumentException("No SocketItem mapping for given id: $id")
+fun getItemId(clazz: Class<out BaseSocketBody>) = socketIdMap.entries.find { it.value == clazz }?.key ?: throw IllegalArgumentException("No id found for the SocketItem given")
 
 

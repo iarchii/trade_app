@@ -24,8 +24,14 @@ class RxSocketWrapper(
     private val client = OkHttpClient()
 
     private var socket: WebSocket? = null
-    private var status: Status = Status.DISCONNECTED
+    var status: Status = Status.DISCONNECTED
+        set(value) {
+            field = value
+            stateFlowable.onNext(value)
+        }
+        get
 
+    
     private val stateFlowable = BehaviorProcessor.create<Status>().toSerialized()
     private val messageFlowable = PublishProcessor.create<String>().toSerialized()
 
@@ -73,17 +79,12 @@ class RxSocketWrapper(
 
         override fun onOpen(webSocket: WebSocket?, response: Response?) {
             super.onOpen(webSocket, response)
-            setStatus(Status.CONNECTED)
+            status = Status.CONNECTED 
         }
 
         override fun onFailure(webSocket: WebSocket?, t: Throwable, response: Response?) {
             super.onFailure(webSocket, t, response)
             handleError(t)
-        }
-
-        override fun onClosing(webSocket: WebSocket?, code: Int, reason: String?) {
-            super.onClosing(webSocket, code, reason)
-            setStatus(Status.DISCONNECTING)
         }
 
         override fun onMessage(webSocket: WebSocket?, text: String?) {
@@ -108,20 +109,13 @@ class RxSocketWrapper(
 
         private fun clear() {
             socket = null
-            setStatus(Status.DISCONNECTED)
+            status = Status.DISCONNECTED
         }
 
     }
 
-    private fun setStatus(status: Status) {
-        this.status = status
-        stateFlowable.onNext(status)
-    }
-
     enum class Status {
         DISCONNECTED,
-        DISCONNECTING,
-        CONNECTING,
         CONNECTED,
         READY
     }

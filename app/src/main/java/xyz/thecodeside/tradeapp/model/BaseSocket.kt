@@ -2,11 +2,13 @@ package xyz.thecodeside.tradeapp.model
 
 import com.google.gson.annotations.SerializedName
 
-const val TOPIC_NAME = "t"
+const val SOCKET_TOPIC_NAME = "t"
+const val SOCKET_BODY_NAME = "t"
 
-data class BaseSocket(
-        @SerializedName(TOPIC_NAME)
+open class BaseSocket(
+        @SerializedName(SOCKET_TOPIC_NAME)
         val topic: SocketTopic,
-        val socketBody: String
+        @SerializedName(SOCKET_BODY_NAME)
+        val body: BaseSocketBody
 )
 
