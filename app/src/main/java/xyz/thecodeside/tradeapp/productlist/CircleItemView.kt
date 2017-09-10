@@ -1,4 +1,4 @@
-package xyz.thecodeside.tradeapp.list
+package xyz.thecodeside.tradeapp.productlist
 
 import android.content.Context
 import android.util.AttributeSet
