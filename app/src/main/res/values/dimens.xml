@@ -3,4 +3,5 @@
     <dimen name="half_circle_item">50dp</dimen>
     <dimen name="circle_item">100dp</dimen>
     <dimen name="circle_item_oval">106dp</dimen>
+    <dimen name="product_spaceing">10dp</dimen>
 </resources>
