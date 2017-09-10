@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:bottom="@dimen/half_circle_item">
+        <shape android:shape="rectangle">
+            <solid android:color="@android:color/white" />
+            <size
+                android:width="@dimen/circle_item"
+                android:height="@dimen/half_circle_item" />
+            <corners
+                android:topLeftRadius="@dimen/circle_item"
+                android:topRightRadius="@dimen/circle_item" />
+        </shape>
+    </item>
+    <item android:top="@dimen/half_circle_item">
+        <shape android:shape="rectangle">
+            <solid android:color="@android:color/holo_blue_light" />
+            <size
+                android:width="@dimen/circle_item"
+                android:height="@dimen/half_circle_item" />
+            <corners
+                android:bottomLeftRadius="@dimen/circle_item"
+                android:bottomRightRadius="@dimen/circle_item" />
+        </shape>
+    </item>
+
+</layer-list>
