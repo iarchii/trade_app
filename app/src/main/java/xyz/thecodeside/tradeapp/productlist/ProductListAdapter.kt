@@ -22,6 +22,12 @@ class ProductListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun getItemCount(): Int = products.size
 
+    fun setProducts(productsList: List<Product>) {
+        products.clear()
+        products.addAll(productsList)
+        notifyDataSetChanged()
+    }
+
 
 }
 
