@@ -3,4 +3,7 @@
 
     <string name="network_error">Network connection error</string>
     <string name="unknown_error">Unknown error</string>
+    <string name="id_format" >#%1$s</string>
+    <string name="current_price">Current price:</string>
+    <string name="closing_price">Closing price:</string>
 </resources>

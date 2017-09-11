@@ -20,7 +20,14 @@
     <style name="LabelStyle">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:textSize">30sp</item>
+        <item name="android:textSize">@dimen/details_text_label</item>
+        <item name="android:paddingBottom">@dimen/item_spacing</item>
+    </style>
+
+    <style name="HeadTitleStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">@dimen/details_text_head</item>
         <item name="android:paddingBottom">@dimen/item_spacing</item>
     </style>
 
@@ -40,5 +47,4 @@
     </style>
 
 
-    <dimen name="circle_item_text_head">14sp</dimen>
 </resources>
