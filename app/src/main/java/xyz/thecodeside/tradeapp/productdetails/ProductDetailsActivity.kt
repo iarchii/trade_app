@@ -7,11 +7,8 @@ import android.support.v7.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_product_details.*
 import xyz.thecodeside.tradeapp.R
 import xyz.thecodeside.tradeapp.TradeApp
-import xyz.thecodeside.tradeapp.helpers.NumberFormatter
-import xyz.thecodeside.tradeapp.model.Price
 
 import xyz.thecodeside.tradeapp.model.Product
-import java.util.*
 import javax.inject.Inject
 
 class ProductDetailsActivity : AppCompatActivity(), ProductDetailsPresenter.ProductDetailsView {
@@ -21,17 +18,14 @@ class ProductDetailsActivity : AppCompatActivity(), ProductDetailsPresenter.Prod
         idTv.text = getString(R.string.id_format,securityId)
     }
 
-    override fun showClosingPrice(price: Price) {
-        val formattedClosing = NumberFormatter.format(price.amount, price.decimals)
-        val currencyClosing = Currency.getInstance(price.currency)
-        closingPriceTv.text = "${currencyClosing.symbol}$formattedClosing"
+    override fun showClosingPrice(price: String) {
+        closingPriceTv.text = price
     }
 
-    override fun showCurrentPrice(price: Price) {
-        val formattedCurrent = NumberFormatter.format(price.amount, price.decimals)
-        val currencyCurrent = Currency.getInstance(price.currency)
-        currentPriceTv.text = "${currencyCurrent.symbol}$formattedCurrent"
+    override fun showCurrentPrice(price: String) {
+        currentPriceTv.text = price
     }
+
 
     override fun showError() {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
