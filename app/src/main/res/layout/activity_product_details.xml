@@ -69,4 +69,10 @@
             tools:text="100" />
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/priceDiffPercentTv"
+        style="@style/LabelStyle"
+        tools:text="+ 1,25%"
+        />
+
 </LinearLayout>

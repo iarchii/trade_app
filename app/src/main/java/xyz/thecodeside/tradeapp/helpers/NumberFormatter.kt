@@ -19,7 +19,7 @@ object NumberFormatter{
         df
     }
 
-    fun formatPercent(value: Float) = percentFormatter.format(value)
+    fun formatPercent(value: Float): String? = percentFormatter.format(value)
 
     fun format(value: Float, decimals : Int = DEFAULT_DECIMALS): String? {
         val normalFormatter =

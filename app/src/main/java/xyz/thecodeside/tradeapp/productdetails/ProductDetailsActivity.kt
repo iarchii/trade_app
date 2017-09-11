@@ -7,13 +7,15 @@ import android.support.v7.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_product_details.*
 import xyz.thecodeside.tradeapp.R
 import xyz.thecodeside.tradeapp.TradeApp
+import xyz.thecodeside.tradeapp.helpers.NumberFormatter
 
 import xyz.thecodeside.tradeapp.model.Product
+import xyz.thecodeside.tradeapp.model.ResponseError
 import javax.inject.Inject
 
 class ProductDetailsActivity : AppCompatActivity(), ProductDetailsPresenter.ProductDetailsView {
-    override fun showDiff(calculateDiff: Float) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun showDiff(calculatedDiff: Float) {
+        priceDiffPercentTv.text = NumberFormatter.formatPercent(calculatedDiff)
     }
 
     override fun showProductDetails(displayName: String, symbol: String, securityId : String) {
@@ -30,7 +32,7 @@ class ProductDetailsActivity : AppCompatActivity(), ProductDetailsPresenter.Prod
         currentPriceTv.text = price
     }
 
-    override fun showError() {
+    override fun showError(handleError: ResponseError) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 

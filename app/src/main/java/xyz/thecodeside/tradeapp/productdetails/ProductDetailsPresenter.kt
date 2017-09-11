@@ -1,9 +1,11 @@
 package xyz.thecodeside.tradeapp.productdetails
 
 import xyz.thecodeside.tradeapp.helpers.NumberFormatter
+import xyz.thecodeside.tradeapp.helpers.applyTransformerFlowable
 import xyz.thecodeside.tradeapp.helpers.calculateDiff
 import xyz.thecodeside.tradeapp.model.Price
 import xyz.thecodeside.tradeapp.model.Product
+import xyz.thecodeside.tradeapp.model.ResponseError
 import xyz.thecodeside.tradeapp.mvpbase.MvpView
 import xyz.thecodeside.tradeapp.mvpbase.RxBasePresenter
 import xyz.thecodeside.tradeapp.repository.remote.ApiErrorHandler
@@ -18,7 +20,7 @@ internal constructor(
         private val socket : SocketManager
 ) : RxBasePresenter<ProductDetailsPresenter.ProductDetailsView>(){
     interface ProductDetailsView : MvpView {
-        fun showError()
+        fun showError(handleError: ResponseError)
         fun showClosingPrice(price: String)
         fun showCurrentPrice(price: String)
         fun showProductDetails(displayName: String, symbol: String, securityId: String)
@@ -29,21 +31,35 @@ internal constructor(
 
     fun attachView(mvpView: ProductDetailsView, product: Product?) {
         super.attachView(mvpView)
-        setProduct(product)
+        handleProduct(product)
+
     }
 
-    private fun setProduct(product: Product?) {
+    private fun handleProduct(product: Product?) {
         if (product == null) {
-            view?.showError()
+            view?.showError(apiErrorHandler.getUnknownError())
         } else {
             this.product = product
-            view?.showProductDetails(product.displayName,product.symbol, product.securityId)
-
-            view?.showCurrentPrice(formatPrice(product.currentPrice))
-            view?.showClosingPrice(formatPrice(product.closingPrice))
-
-            view?.showDiff(product.calculateDiff())
+            showProduct(product)
+            initSocket()
         }
+    }
+
+    private fun initSocket() {
+        socket.observe()
+                .compose(applyTransformerFlowable())
+                .subscribe({
+
+                },{
+                  view?.showError(apiErrorHandler.handleError(it))
+                })
+    }
+
+    private fun showProduct(product: Product) {
+        view?.showProductDetails(product.displayName, product.symbol, product.securityId)
+        view?.showCurrentPrice(formatPrice(product.currentPrice))
+        view?.showClosingPrice(formatPrice(product.closingPrice))
+        view?.showDiff(product.calculateDiff())
     }
 
     private fun formatPrice(price: Price): String {
