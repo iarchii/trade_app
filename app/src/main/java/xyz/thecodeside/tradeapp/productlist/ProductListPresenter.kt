@@ -51,6 +51,7 @@ internal constructor(
                 .subscribe({
                     view?.showProducts(productsList)
                 }, {
+                    logger.logException(it)
                     view?.showError()
                 })
     }
