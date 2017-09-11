@@ -1,11 +1,11 @@
 package xyz.thecodeside.tradeapp.productdetails
 
 import xyz.thecodeside.tradeapp.helpers.NumberFormatter
+import xyz.thecodeside.tradeapp.helpers.calculateDiff
 import xyz.thecodeside.tradeapp.model.Price
 import xyz.thecodeside.tradeapp.model.Product
 import xyz.thecodeside.tradeapp.mvpbase.MvpView
 import xyz.thecodeside.tradeapp.mvpbase.RxBasePresenter
-import xyz.thecodeside.tradeapp.productlist.GetProductDetailUseCase
 import xyz.thecodeside.tradeapp.repository.remote.ApiErrorHandler
 import xyz.thecodeside.tradeapp.repository.remote.socket.SocketManager
 import java.util.*
@@ -22,6 +22,7 @@ internal constructor(
         fun showClosingPrice(price: String)
         fun showCurrentPrice(price: String)
         fun showProductDetails(displayName: String, symbol: String, securityId: String)
+        fun showDiff(calculateDiff: Float)
     }
 
     private lateinit var product : Product
@@ -40,6 +41,8 @@ internal constructor(
 
             view?.showCurrentPrice(formatPrice(product.currentPrice))
             view?.showClosingPrice(formatPrice(product.closingPrice))
+
+            view?.showDiff(product.calculateDiff())
         }
     }
 

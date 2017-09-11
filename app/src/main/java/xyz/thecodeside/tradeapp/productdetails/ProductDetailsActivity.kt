@@ -12,6 +12,10 @@ import xyz.thecodeside.tradeapp.model.Product
 import javax.inject.Inject
 
 class ProductDetailsActivity : AppCompatActivity(), ProductDetailsPresenter.ProductDetailsView {
+    override fun showDiff(calculateDiff: Float) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     override fun showProductDetails(displayName: String, symbol: String, securityId : String) {
         displayNameTv.text = displayName
         symbolTv.text = symbol
@@ -25,7 +29,6 @@ class ProductDetailsActivity : AppCompatActivity(), ProductDetailsPresenter.Prod
     override fun showCurrentPrice(price: String) {
         currentPriceTv.text = price
     }
-
 
     override fun showError() {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
