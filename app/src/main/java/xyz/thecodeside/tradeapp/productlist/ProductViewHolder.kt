@@ -15,7 +15,7 @@ class ProductViewHolder(val clickListener: ProductClickListener,
         this.product = product
 
         itemView.productName.text = product.displayName
-        itemView.productPrice.text = NumberFormatter.format(product.currentPrice.amount)
+        itemView.productPrice.text = NumberFormatter.format(product.currentPrice.amount, product.currentPrice.decimals)
         val diff = calculateDiff(product.currentPrice.amount, product.closingPrice.amount)
 
         itemView.productDiff.text = NumberFormatter.formatPercent(diff)
