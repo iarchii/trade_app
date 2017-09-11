@@ -1,5 +1,6 @@
 package xyz.thecodeside.tradeapp.productdetails
 
+import xyz.thecodeside.tradeapp.model.Price
 import xyz.thecodeside.tradeapp.model.Product
 import xyz.thecodeside.tradeapp.mvpbase.MvpView
 import xyz.thecodeside.tradeapp.mvpbase.RxBasePresenter
@@ -17,8 +18,9 @@ internal constructor(
 ) : RxBasePresenter<ProductDetailsPresenter.ProductDetailsView>(){
     interface ProductDetailsView : MvpView {
         fun showError()
-        fun showProduct(product: Product)
-
+        fun showClosingPrice(price: Price)
+        fun showCurrentPrice(price: Price)
+        fun showProductDetails(displayName: String, symbol: String, securityId: String)
     }
 
     private lateinit var product : Product
@@ -33,7 +35,9 @@ internal constructor(
             view?.showError()
         } else {
             this.product = product
-            view?.showProduct(product)
+            view?.showProductDetails(product.displayName,product.symbol, product.securityId)
+            view?.showCurrentPrice(product.currentPrice)
+            view?.showClosingPrice(product.closingPrice)
         }
     }
 
