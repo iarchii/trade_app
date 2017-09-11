@@ -4,6 +4,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.View
 import com.jakewharton.rxbinding2.view.RxView
 import kotlinx.android.synthetic.main.circle_item_view.view.*
+import xyz.thecodeside.tradeapp.helpers.NumberFormatter
 import xyz.thecodeside.tradeapp.model.Product
 
 class ProductViewHolder(val clickListener: ProductClickListener,
@@ -14,15 +15,17 @@ class ProductViewHolder(val clickListener: ProductClickListener,
         this.product = product
 
         itemView.productName.text = product.displayName
-        itemView.productPrice.text = product.currentPrice.amount.toString()
-        itemView.productDiff.text = calculateDiff(product.currentPrice.amount, product.closingPrice.amount).toString()
+        itemView.productPrice.text = NumberFormatter.format(product.currentPrice.amount)
+        val diff = calculateDiff(product.currentPrice.amount, product.closingPrice.amount)
+
+        itemView.productDiff.text = NumberFormatter.formatPercent(diff)
         RxView.clicks(itemView).subscribe({
             clickListener.onClick(product)
         })
     }
 
     private fun calculateDiff(currentPrice: Float, closingPrice: Float): Float =
-            (currentPrice-closingPrice)/closingPrice * 100
+            ((currentPrice-closingPrice)/closingPrice) * 100
 
 
 }
