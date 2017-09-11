@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/progressOverlay"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:background="@android:drawable/screen_background_light_transparent"
+    android:clickable="true"
+    android:elevation="8dp"
+    android:visibility="gone" >
+
+    <ProgressBar
+        android:id="@+id/loadingPb"
+        android:layout_gravity="center"
+        style="@style/ProgressSpinner" />
+
+</FrameLayout>
