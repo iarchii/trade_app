@@ -15,7 +15,6 @@ class ProductDetailsPresenter
 @Inject
 internal constructor(
         private val apiErrorHandler: ApiErrorHandler,
-        private val productDetailUseCase: GetProductDetailUseCase,
         private val socket : SocketManager
 ) : RxBasePresenter<ProductDetailsPresenter.ProductDetailsView>(){
     interface ProductDetailsView : MvpView {
