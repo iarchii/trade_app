@@ -73,7 +73,7 @@ class RxSocketWrapper(
                 .addHeader(AUTHORIZATION_KEY, AUTH_PREFIX + token)
                 .build()
 
-        socket = client?.newWebSocket(request, socketClusterListener)
+        socket = client.newWebSocket(request, socketClusterListener)
 
 
     }
@@ -81,7 +81,7 @@ class RxSocketWrapper(
     private fun reconnect(request: Request?) {
         Single.timer(RECONNECT_DELAY_MILLISECONDS, TimeUnit.MILLISECONDS)
                 .subscribe({
-                    socket = client?.newWebSocket(request, socketClusterListener)
+                    socket = client.newWebSocket(request, socketClusterListener)
                 },{
                     logger.logException(it)
                 })
