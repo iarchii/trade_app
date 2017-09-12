@@ -12,6 +12,10 @@ class SocketManager(private val socketAddress: String,
                     private val packer: SocketItemPacker,
                     private val logger: Logger) {
 
+    companion object {
+        const val TAG = "SOCKET"
+    }
+
     private val TIMEOUT_SECONDS = 4L
 
     fun connect(): Completable = socket

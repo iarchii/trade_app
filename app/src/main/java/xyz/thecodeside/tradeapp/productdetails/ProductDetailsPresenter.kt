@@ -1,5 +1,6 @@
 package xyz.thecodeside.tradeapp.productdetails
 
+import android.util.Log
 import xyz.thecodeside.tradeapp.helpers.*
 import xyz.thecodeside.tradeapp.model.Price
 import xyz.thecodeside.tradeapp.model.Product
@@ -48,6 +49,7 @@ internal constructor(
         socket.observe()
                 .compose(applyTransformerFlowable())
                 .subscribe({
+                    //TODO
                     println(it)
                 },{
                   view?.showError(apiErrorHandler.handleError(it))
@@ -56,12 +58,14 @@ internal constructor(
         socket.connect()
                 .compose(applyTransformerCompletable())
                 .subscribe({
-                    println("CONNECTED")
+                    Log.d(SocketManager.TAG, "CONNECTED & READY")
                 },{
                     logger.logException(it)
                 })
 
     }
+
+
 
     private fun showProduct(product: Product) {
         view?.showProductDetails(product.displayName, product.symbol, product.securityId)

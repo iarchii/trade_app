@@ -1,5 +1,6 @@
 package xyz.thecodeside.tradeapp.model
 
 data class Connected(
-        val developerMessage : String
+        val sessionId : String,
+        val time: String
 ): BaseSocketBody

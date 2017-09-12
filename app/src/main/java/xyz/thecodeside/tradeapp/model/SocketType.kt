@@ -6,8 +6,9 @@ enum class SocketType {
     @SerializedName("connect.connected")
     CONNECT_CONNECTED,
     @SerializedName("connect.failed")
-    CONNECT_FAILED;
+    CONNECT_FAILED,
+    @SerializedName("portfolio.performance")
+    PORTFOLIO_PERFORMANCE,
 
-    val socketName = name.toLowerCase().replace("_", ".")
 
 }
