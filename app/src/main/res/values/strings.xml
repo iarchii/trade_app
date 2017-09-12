@@ -9,4 +9,5 @@
     <string name="market_locked">Market is locked</string>
     <string name="market_offline">Market is offline, try again in few minutes</string>
     <string name="market_online">Market is online</string>
+    <string name="app_wont_work_offline">This app will not work offline. Please check internet connection.</string>
 </resources>

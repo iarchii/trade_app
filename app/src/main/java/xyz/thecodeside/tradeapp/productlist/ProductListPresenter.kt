@@ -1,7 +1,9 @@
 package xyz.thecodeside.tradeapp.productlist
 
+import android.app.Activity
 import io.reactivex.Flowable
 import io.reactivex.schedulers.Schedulers
+import xyz.thecodeside.tradeapp.helpers.InternetConnectionManager
 import xyz.thecodeside.tradeapp.helpers.Logger
 import xyz.thecodeside.tradeapp.helpers.applyTransformerFlowable
 import xyz.thecodeside.tradeapp.model.Product
@@ -15,6 +17,7 @@ class ProductListPresenter
 internal constructor(
         private val apiErrorHandler: ApiErrorHandler,
         private val productDetailUseCase: GetProductDetailUseCase,
+        private val connectionManager: InternetConnectionManager, //TODO move it to BaseActivityPresenter
         private val logger: Logger
 ) : RxBasePresenter<ProductListPresenter.ProductListView>() {
 
@@ -31,10 +34,26 @@ internal constructor(
 
     override fun attachView(mvpView: ProductListView) {
         super.attachView(mvpView)
+        connectionManager.observe(view?.getActivity())
+                .subscribe({
+                    handleNetworkState(it)
+                },{
+                    logger.logException(it)
+                    handleNetworkState(InternetConnectionManager.Status.OFFLINE)
+                })
+                .registerInPresenter()
         loadProducts()
     }
 
+    private fun handleNetworkState(it: InternetConnectionManager.Status?) {
+        when(it){
+            InternetConnectionManager.Status.ONLINE -> view?.showOnline()
+            InternetConnectionManager.Status.OFFLINE -> view?.showOffline()
+        }
+    }
+
     private fun loadProducts() {
+        productsList.clear()
         Flowable.fromIterable(productsIds.values)
                 .observeOn(Schedulers.io())
                 .flatMap { productDetailUseCase.get(it).toFlowable() }
@@ -53,7 +72,7 @@ internal constructor(
                 }, {
                     logger.logException(it)
                     view?.showError()
-                })
+                }).registerInPresenter()
     }
 
     fun handleProductClick(product: Product) {
@@ -64,6 +83,10 @@ internal constructor(
         fun showProducts(productsList: MutableList<Product>)
         fun showError()
         fun showProductDetails(product: Product)
+        //TODO move it to BaseActivityPresenter.BaseView
+        fun getActivity(): Activity
+        fun showOnline()
+        fun showOffline()
     }
 
 }
