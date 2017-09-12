@@ -41,14 +41,15 @@ internal constructor(
     }
 
     override fun detachView() {
-        unsubscribeProduct()
+        unsubscribeProduct(product.securityId)
         socket.disconnect()
 
         super.detachView()
     }
 
-    fun unsubscribeProduct(){
-
+    private fun unsubscribeProduct(id: String){
+        val request = SocketRequest(unsubscribeProduct = listOf(SubscriptionProduct(id)))
+        socket.send(request)
     }
 
     private fun handleProduct(product: Product?) {
