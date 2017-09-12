@@ -42,7 +42,7 @@ class ProductListActivity : AppCompatActivity(), ProductListPresenter.ProductLis
 
         productsRV.layoutManager = GridLayoutManager(this, PRODUCT_COLUMNS)
         productsRV.addItemDecoration(GridItemDecoration(
-                resources.getDimensionPixelSize(R.dimen.product_spaceing),
+                resources.getDimensionPixelSize(R.dimen.item_spacing),
                 PRODUCT_COLUMNS))
         productsRV.adapter = adapter
 

@@ -23,34 +23,27 @@
             android:gravity="center"
             android:orientation="vertical">
 
-            <View
-                android:id="@+id/image"
+            <ImageView
+                android:id="@+id/statusIv"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="1" />
+                android:layout_weight="1"
+                android:src="@mipmap/ic_lock"
+                />
 
             <TextView
-                android:id="@+id/productName"
-                android:layout_width="wrap_content"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:textStyle="bold"
+                android:id="@+id/productNameTv"
+                style="@style/CircleItemStyle.Head"
                 tools:text="Google" />
 
             <TextView
-                android:id="@+id/productPrice"
-                android:layout_width="wrap_content"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:gravity="center"
-                tools:text="445,98" />
+                android:id="@+id/productPriceTv"
+                tools:text="445,98"
+                style="@style/CircleItemStyle" />
 
             <TextView
-                android:id="@+id/productDiff"
-                android:layout_width="wrap_content"
-                android:layout_height="0dp"
-                android:layout_weight="1"
+                android:id="@+id/productDiffTv"
+                style="@style/CircleItemStyle"
                 tools:text="+0,00%" />
         </LinearLayout>
     </LinearLayout>

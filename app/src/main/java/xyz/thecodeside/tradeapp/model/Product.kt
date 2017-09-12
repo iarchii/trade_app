@@ -5,23 +5,24 @@ import java.io.Serializable
 
 @Keep
 data class Product(
-		var symbol: String,// FRANCE40
-		var securityId: String,// 26608
-		var displayName: String,// French Exchange
-		var currentPrice: CurrentPrice,
-		var closingPrice: ClosingPrice
+        val symbol: String,// FRANCE40
+        val securityId: String,// 26608
+        val displayName: String,// French Exchange
+        val currentPrice: Price,
+        val closingPrice: Price,
+        val productMarketStatus: MarketStatus
 ) : Serializable
 
 @Keep
-data class CurrentPrice(
-		var currency: String,// EUR
-		var decimals: Int,// 1
+enum class MarketStatus {
+    OPEN,
+    CLOSED
+}
+
+@Keep
+data class Price(
+        val currency: String,// EUR
+        val decimals: Int,// 1
 		var amount: Float// 4371.8
 ) : Serializable
 
-@Keep
-data class ClosingPrice(
-		var currency: String,// EUR
-		var decimals: Int,// 1
-		var amount: Float// 4216.4
-) : Serializable

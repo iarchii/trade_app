@@ -21,7 +21,7 @@ class RxSocketWrapper(
     private val AUTHORIZATION_KEY = "Authorization"
     private val AUTH_PREFIX = "Bearer "
 
-    private val client = OkHttpClient()
+    private lateinit var client : OkHttpClient
 
     private var socket: WebSocket? = null
     var status: Status = Status.DISCONNECTED
@@ -58,6 +58,7 @@ class RxSocketWrapper(
     }
 
     private fun connectSocket(address: String){
+        client = OkHttpClient()
         val request = Request.Builder()
                 .url(address)
                 .addHeader(AUTHORIZATION_KEY, AUTH_PREFIX + token)

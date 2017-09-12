@@ -2,35 +2,39 @@ package xyz.thecodeside.tradeapp.repository.remote.socket
 
 import android.util.Log
 import com.google.gson.Gson
+import org.json.JSONObject
 import xyz.thecodeside.tradeapp.model.*
 
 class SocketItemPacker {
 
-    fun pack(item: BaseSocket): String {
-            val gson = Gson()
-            val jsonString = gson.toJson(item, getItemClass(item.topic.name))
-            return jsonString
-        }
+    fun pack(item: SocketRequest): String {
+        val messageString = Gson().toJson(item)
+        Log.d(SocketManager.TAG, "sendMessage = $messageString")
+        return messageString
+    }
 
-        fun unpack(message: String?): BaseSocket {
-            Log.d("SOCKET", "messageString = $message")
-            val gson = Gson()
+    fun unpack(message: String?): BaseSocket {
+        Log.d(SocketManager.TAG, "messageString = $message")
+        val gson = Gson()
+        val json = JSONObject(message)
+        json.has(SOCKET_TOPIC_NAME)
+        val idString = if(json.has(SOCKET_TOPIC_NAME)) json.getString(SOCKET_TOPIC_NAME) else throw IllegalArgumentException("Cannot find id of SocketType in: $json")
+        val id = gson.fromJson(idString, SocketType::class.java) ?: throw IllegalArgumentException("No SocketType mapping for given id: $idString")
+        val body =  if(json.has(SOCKET_BODY_NAME)) json.getString(SOCKET_BODY_NAME) else throw IllegalArgumentException("Cannot find body of SocketMessage in: $json")
+        val socketBody = gson.fromJson(body , getItemClass(id))
 
-            val envelopeAsMap = gson.fromJson(message, Map::class.java)
-            val id = envelopeAsMap[SOCKET_TOPIC_NAME] as String? ?: throw IllegalArgumentException("Cannot find id of SocketItem in: $envelopeAsMap")
-
-            val socketBody = gson.fromJson(envelopeAsMap[SOCKET_BODY_NAME] as String? , getItemClass(id))
-
-            return BaseSocket(SocketTopic.valueOf(id), socketBody)
-        }
+        return BaseSocket(id, socketBody)
+    }
 
 }
 private val socketIdMap = mapOf(
-        SocketTopic.CONNECTED.name to Connected::class.java,
-        SocketTopic.CONNECTED_FAILED.name to ConnectFailed::class.java
+        SocketType.CONNECT_CONNECTED to Connected::class.java,
+        SocketType.CONNECT_FAILED to ResponseError::class.java,
+        SocketType.TRADING_QUOTE to TradingQuote::class.java,
+        SocketType.PORTFOLIO_PERFORMANCE to PortfolioPerformance::class.java
 )
 
-fun getItemClass(id: String): Class<out BaseSocketBody> = socketIdMap[id] ?: throw IllegalArgumentException("No SocketItem mapping for given id: $id")
-fun getItemId(clazz: Class<out BaseSocketBody>) = socketIdMap.entries.find { it.value == clazz }?.key ?: throw IllegalArgumentException("No id found for the SocketItem given")
+
+fun getItemClass(id: SocketType): Class<out BaseSocketBody> = socketIdMap[id] ?: throw IllegalArgumentException("No SocketType mapping for given id: $id")
 
 

@@ -1,25 +1,24 @@
 package xyz.thecodeside.tradeapp.repository.remote.socket
 
-import io.reactivex.Completable
 import io.reactivex.Flowable
 import xyz.thecodeside.tradeapp.helpers.Logger
 import xyz.thecodeside.tradeapp.model.BaseSocket
-import xyz.thecodeside.tradeapp.model.SocketTopic
-import java.util.concurrent.TimeUnit
+import xyz.thecodeside.tradeapp.model.SocketRequest
+import xyz.thecodeside.tradeapp.model.SocketType
 
 class SocketManager(private val socketAddress: String,
                     private val socket: RxSocketWrapper,
                     private val packer: SocketItemPacker,
                     private val logger: Logger) {
 
+    companion object {
+        const val TAG = "SOCKET"
+    }
+
     private val TIMEOUT_SECONDS = 4L
 
-    fun connect(): Completable = socket
+    fun connect(): Flowable<RxSocketWrapper.Status> = socket
             .connect(socketAddress)
-            .filter { isReady(it) }
-            .timeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
-            .firstOrError()
-            .toCompletable()
             .doOnError {
                 disconnect()
             }
@@ -30,7 +29,7 @@ class SocketManager(private val socketAddress: String,
 
     fun disconnect() = socket.disconnect()
 
-    fun send(item: BaseSocket) {
+    fun send(item: SocketRequest) {
         socket.send(packer.pack(item))
     }
 
@@ -49,7 +48,7 @@ class SocketManager(private val socketAddress: String,
     }
 
     private fun isConnectedMessage(it: BaseSocket) =
-            it.topic == SocketTopic.CONNECTED
+            it.type == SocketType.CONNECT_CONNECTED
 
     private fun isConnected() = socket.status == RxSocketWrapper.Status.CONNECTED
 

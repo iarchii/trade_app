@@ -17,5 +17,34 @@
         <item name="android:layout_margin">8dp</item>
     </style>
 
+    <style name="LabelStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">@dimen/details_text_label</item>
+        <item name="android:paddingBottom">@dimen/item_spacing</item>
+    </style>
+
+    <style name="HeadTitleStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">@dimen/details_text_head</item>
+        <item name="android:paddingBottom">@dimen/item_spacing</item>
+    </style>
+
+    <style name="CircleItemStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:gravity">center</item>
+    </style>
+    <style name="CircleItemStyle.Head">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">@dimen/circle_item_text_head</item>
+    </style>
+
 
 </resources>

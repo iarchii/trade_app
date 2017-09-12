@@ -11,6 +11,9 @@ fun View.hide() {
 fun View.show() {
     this.visibility = View.VISIBLE
 }
+fun View.invisible() {
+    this.visibility = View.INVISIBLE
+}
 
 /**
  * This method converts dp unit to equivalent pixels, depending on device density.

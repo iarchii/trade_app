@@ -4,26 +4,58 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import kotlinx.android.synthetic.main.circle_item_view.*
+import kotlinx.android.synthetic.main.activity_product_details.*
 import xyz.thecodeside.tradeapp.R
 import xyz.thecodeside.tradeapp.TradeApp
 import xyz.thecodeside.tradeapp.helpers.NumberFormatter
+import xyz.thecodeside.tradeapp.helpers.showToastShort
+
 import xyz.thecodeside.tradeapp.model.Product
+import xyz.thecodeside.tradeapp.model.ResponseError
 import javax.inject.Inject
 
-class ProductDetailsActivity  : AppCompatActivity(), ProductDetailsPresenter.ProductDetailsView{
-    override fun showProduct(product: Product) {
-        productName.text = product.displayName
-        productPrice.text = NumberFormatter.format(product.currentPrice.amount)
+class ProductDetailsActivity : AppCompatActivity(), ProductDetailsPresenter.ProductDetailsView {
+    override fun showLockedMarket() {
+        statusIv.setImageResource(R.mipmap.ic_lock)
+        statusTv.setText(R.string.market_locked)
     }
 
-    override fun showError() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun showOffline() {
+        statusIv.setImageResource(R.mipmap.ic_offline)
+        statusTv.setText(R.string.market_offline)
+    }
+
+    override fun showOnline() {
+        statusIv.setImageResource(R.mipmap.ic_online)
+        statusTv.setText(R.string.market_online)
+    }
+
+    override fun showDiff(calculatedDiff: Float) {
+        priceDiffPercentTv.text = NumberFormatter.formatPercent(calculatedDiff)
+    }
+
+    override fun showProductDetails(displayName: String, symbol: String, securityId : String) {
+        displayNameTv.text = displayName
+        symbolTv.text = symbol
+        idTv.text = getString(R.string.id_format,securityId)
+    }
+
+    override fun showClosingPrice(price: String) {
+        closingPriceTv.text = price
+    }
+
+    override fun showCurrentPrice(price: String) {
+        currentPriceTv.text = price
+    }
+
+    override fun showError(handleError: ResponseError) {
+        //TODO Better error handling
+        showToastShort(handleError.message ?: getString(R.string.unknown_error))
     }
 
     companion object {
         private const val PRODUCT_KEY = "PRODUCT_KEY"
-        fun show(context: Context, product: Product){
+        fun show(context: Context, product: Product) {
             val intent = Intent(context, ProductDetailsActivity::class.java)
             intent.putExtra(PRODUCT_KEY, product)
             context.startActivity(intent)
@@ -36,13 +68,18 @@ class ProductDetailsActivity  : AppCompatActivity(), ProductDetailsPresenter.Pro
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_product_details)
         TradeApp.baseComponent.inject(this)
-        val product = intent?.getSerializableExtra(PRODUCT_KEY) as Product?
-        presenter.attachView(this, product)
+
     }
 
-    override fun onDestroy() {
+    override fun onResume() {
+        super.onStart()
+        val product = intent?.getSerializableExtra(PRODUCT_KEY) as Product?
+        presenter.attachView(this, product)
+
+    }
+    override fun onPause() {
         presenter.detachView()
-        super.onDestroy()
+        super.onPause()
     }
 
 
