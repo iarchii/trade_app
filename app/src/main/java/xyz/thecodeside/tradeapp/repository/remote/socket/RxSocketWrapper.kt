@@ -38,16 +38,14 @@ class RxSocketWrapper(
     private val stateFlowable = BehaviorProcessor.create<Status>().toSerialized()
     private val messageFlowable = PublishProcessor.create<String>().toSerialized()
 
-    fun connect(address: String): Flowable<Status> {
-        return Flowable
-                .fromCallable {
-                    //reuse existing connection, only really connect if DISCONNECTED
-                    if (status == Status.DISCONNECTED) {
-                        connectSocket(address)
-                    }
+    fun connect(address: String): Flowable<Status> = Flowable
+            .fromCallable {
+                //reuse existing connection, only really connect if DISCONNECTED
+                if (status == Status.DISCONNECTED) {
+                    connectSocket(address)
                 }
-                .flatMap { stateFlowable }
-    }
+            }
+            .flatMap { stateFlowable }
 
     fun observeSocketMessages(): Flowable<String> = messageFlowable
 

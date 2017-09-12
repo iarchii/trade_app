@@ -27,9 +27,7 @@ class SocketManager(private val socketAddress: String,
 
     fun disconnect() = socket.disconnect()
 
-    fun send(item: SocketRequest) {
-        socket.send(packer.pack(item))
-    }
+    fun send(item: SocketRequest) = socket.send(packer.pack(item))
 
     fun observe(): Flowable<BaseSocket> = socket
             .observeSocketMessages()

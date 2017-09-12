@@ -11,7 +11,7 @@ import xyz.thecodeside.tradeapp.helpers.show
 import xyz.thecodeside.tradeapp.model.MarketStatus
 import xyz.thecodeside.tradeapp.model.Product
 
-class ProductViewHolder(val clickListener: ProductClickListener,
+class ProductViewHolder(private val clickListener: ProductClickListener,
                         itemView: View) : RecyclerView.ViewHolder(itemView) {
     lateinit var product : Product
 

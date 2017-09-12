@@ -22,16 +22,12 @@ class ProductListActivity : BaseActivity(), ProductListPresenter.ProductListView
 
     override fun getActivity(): Activity = this
 
-    override fun showOnline() {
-        hideOfflineMessage()
-    }
+    override fun showOnline() = hideOfflineMessage()
 
-    override fun showOffline() {
-        showOfflineMessage(findViewById(android.R.id.content))
-    }
+    override fun showOffline() = showOfflineMessage(findViewById(android.R.id.content))
 
     @Inject lateinit var presenter: ProductListPresenter
-    var adapter: ProductListAdapter = ProductListAdapter()
+    private var adapter: ProductListAdapter = ProductListAdapter()
 
     private val PRODUCT_COLUMNS = 2
 
@@ -52,9 +48,7 @@ class ProductListActivity : BaseActivity(), ProductListPresenter.ProductListView
 
     private fun setupRecycler() {
         adapter.clickListener = object : ProductClickListener {
-            override fun onClick(product: Product) {
-                presenter.handleProductClick(product)
-            }
+            override fun onClick(product: Product) = presenter.handleProductClick(product)
         }
 
         productsRV.layoutManager = GridLayoutManager(this, PRODUCT_COLUMNS)
@@ -70,12 +64,9 @@ class ProductListActivity : BaseActivity(), ProductListPresenter.ProductListView
         adapter.setProducts(productsList)
     }
 
-    override fun showError(message: String?) {
-        showToastShort(message ?: getString(R.string.unknown_error))
-    }
+    override fun showError(message: String?) =
+            showToastShort(message ?: getString(R.string.unknown_error))
 
-    override fun showProductDetails(product: Product) {
-        ProductDetailsActivity.show(this, product)
-    }
+    override fun showProductDetails(product: Product) = ProductDetailsActivity.show(this, product)
 }
 

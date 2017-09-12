@@ -14,12 +14,10 @@ import xyz.thecodeside.tradeapp.model.Product
 import javax.inject.Inject
 
 class ProductDetailsActivity : BaseActivity(), ProductDetailsPresenter.ProductDetailsView {
-    override fun showOnline() {
-        hideOfflineMessage()
-    }
+    override fun showOnline() = hideOfflineMessage()
 
     override fun showOffline() {
-        showOfflineMessage(findViewById(android.R.id.content))
+        showOfflineMessage(rootView = findViewById(android.R.id.content))
     }
 
     override fun getActivity(): Activity = this
@@ -57,9 +55,8 @@ class ProductDetailsActivity : BaseActivity(), ProductDetailsPresenter.ProductDe
         currentPriceTv.text = price
     }
 
-    override fun showError(message : String?) {
-        showToastShort(message ?: getString(R.string.unknown_error))
-    }
+    override fun showError(message : String?) =
+            showToastShort(message ?: getString(R.string.unknown_error))
 
     companion object {
         private const val PRODUCT_KEY = "PRODUCT_KEY"
