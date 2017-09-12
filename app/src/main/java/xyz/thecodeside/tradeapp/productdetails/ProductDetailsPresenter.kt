@@ -84,12 +84,10 @@ internal constructor(
     }
 
     private fun handleProduct(product: Product?) {
-        if (product == null) {
-            view?.showError(apiErrorHandler.getUnknownError())
-        } else {
+        product?.let {
             this.product = product
             showProduct(product)
-        }
+        } ?: view?.showError(apiErrorHandler.getUnknownError())
     }
 
     private fun initMarketOnline(product: Product) {
