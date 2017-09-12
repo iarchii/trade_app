@@ -8,6 +8,7 @@ import kotlinx.android.synthetic.main.activity_product_details.*
 import xyz.thecodeside.tradeapp.R
 import xyz.thecodeside.tradeapp.TradeApp
 import xyz.thecodeside.tradeapp.helpers.NumberFormatter
+import xyz.thecodeside.tradeapp.helpers.showToastShort
 
 import xyz.thecodeside.tradeapp.model.Product
 import xyz.thecodeside.tradeapp.model.ResponseError
@@ -33,7 +34,8 @@ class ProductDetailsActivity : AppCompatActivity(), ProductDetailsPresenter.Prod
     }
 
     override fun showError(handleError: ResponseError) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        //TODO Better error handling
+        showToastShort(handleError.message ?: getString(R.string.unknown_error))
     }
 
     companion object {
