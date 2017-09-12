@@ -7,7 +7,11 @@ import xyz.thecodeside.tradeapp.model.*
 
 class SocketItemPacker {
 
-    fun pack(item: BaseSocket): String = Gson().toJson(item)
+    fun pack(item: SocketRequest): String {
+        val messageString = Gson().toJson(item)
+        Log.d(SocketManager.TAG, "sendMessage = $messageString")
+        return messageString
+    }
 
     fun unpack(message: String?): BaseSocket {
         Log.d(SocketManager.TAG, "messageString = $message")
@@ -26,8 +30,10 @@ class SocketItemPacker {
 private val socketIdMap = mapOf(
         SocketType.CONNECT_CONNECTED to Connected::class.java,
         SocketType.CONNECT_FAILED to ResponseError::class.java,
+        SocketType.TRADING_QUOTE to TradingQuote::class.java,
         SocketType.PORTFOLIO_PERFORMANCE to PortfolioPerformance::class.java
 )
+
 
 fun getItemClass(id: SocketType): Class<out BaseSocketBody> = socketIdMap[id] ?: throw IllegalArgumentException("No SocketType mapping for given id: $id")
 

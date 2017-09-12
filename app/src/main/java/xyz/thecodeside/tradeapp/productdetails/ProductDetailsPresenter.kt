@@ -2,10 +2,11 @@ package xyz.thecodeside.tradeapp.productdetails
 
 import android.util.Log
 import com.google.gson.Gson
-import xyz.thecodeside.tradeapp.helpers.*
-import xyz.thecodeside.tradeapp.model.Price
-import xyz.thecodeside.tradeapp.model.Product
-import xyz.thecodeside.tradeapp.model.ResponseError
+import xyz.thecodeside.tradeapp.helpers.Logger
+import xyz.thecodeside.tradeapp.helpers.NumberFormatter
+import xyz.thecodeside.tradeapp.helpers.applyTransformerFlowable
+import xyz.thecodeside.tradeapp.helpers.calculateDiff
+import xyz.thecodeside.tradeapp.model.*
 import xyz.thecodeside.tradeapp.mvpbase.MvpView
 import xyz.thecodeside.tradeapp.mvpbase.RxBasePresenter
 import xyz.thecodeside.tradeapp.repository.remote.ApiErrorHandler
@@ -25,7 +26,7 @@ internal constructor(
         fun showClosingPrice(price: String)
         fun showCurrentPrice(price: String)
         fun showProductDetails(displayName: String, symbol: String, securityId: String)
-        fun showDiff(calculateDiff: Float)
+        fun showDiff(calculatedDiff: Float)
     }
 
     private lateinit var product : Product
@@ -43,6 +44,7 @@ internal constructor(
             this.product = product
             showProduct(product)
             initSocket()
+
         }
     }
 
@@ -51,31 +53,45 @@ internal constructor(
                 .compose(applyTransformerFlowable())
                 .subscribe({
                    Log.d(SocketManager.TAG, "Message object = ${Gson().toJson(it)}")
-
+                    when(it.type){
+                        SocketType.TRADING_QUOTE -> updateProduct((it.body as TradingQuote).currentPrice)
+                    }
                 },{
                   view?.showError(apiErrorHandler.handleError(it))
                 })
 
         socket.connect()
-                .compose(applyTransformerCompletable())
+                .compose(applyTransformerFlowable())
                 .subscribe({
                     Log.d(SocketManager.TAG, "CONNECTED & READY")
+                    observeProduct(product.securityId)
                 },{
                     logger.logException(it)
                 })
 
     }
 
- /*   private fun observeProduct(id: String){
-        socket.send()
-    }*/
+    private fun updateProduct(updatedPrice: Float) {
+        product.currentPrice.amount = updatedPrice
+        showCurrentPrice(product)
+    }
+
+    private fun observeProduct(id: String){
+        val request = SocketRequest(subscribeProduct = listOf(SubscriptionProduct(id)))
+        socket.send(request)
+    }
 
 
 
     private fun showProduct(product: Product) {
         view?.showProductDetails(product.displayName, product.symbol, product.securityId)
-        view?.showCurrentPrice(formatPrice(product.currentPrice))
         view?.showClosingPrice(formatPrice(product.closingPrice))
+
+        showCurrentPrice(product)
+    }
+
+    private fun showCurrentPrice(product: Product) {
+        view?.showCurrentPrice(formatPrice(product.currentPrice))
         view?.showDiff(product.calculateDiff())
     }
 

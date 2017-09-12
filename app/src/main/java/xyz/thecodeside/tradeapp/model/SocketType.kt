@@ -9,6 +9,8 @@ enum class SocketType {
     CONNECT_FAILED,
     @SerializedName("portfolio.performance")
     PORTFOLIO_PERFORMANCE,
+    @SerializedName("trading.quote")
+    TRADING_QUOTE,
 
 
 }
