@@ -1,6 +1,7 @@
 package xyz.thecodeside.tradeapp.productdetails
 
 import android.util.Log
+import com.google.gson.Gson
 import xyz.thecodeside.tradeapp.helpers.*
 import xyz.thecodeside.tradeapp.model.Price
 import xyz.thecodeside.tradeapp.model.Product
@@ -49,7 +50,7 @@ internal constructor(
         socket.observe()
                 .compose(applyTransformerFlowable())
                 .subscribe({
-                    //TODO
+                   Log.d(SocketManager.TAG, "Message object = ${Gson().toJson(it)}")
 
                 },{
                   view?.showError(apiErrorHandler.handleError(it))
@@ -64,6 +65,10 @@ internal constructor(
                 })
 
     }
+
+ /*   private fun observeProduct(id: String){
+        socket.send()
+    }*/
 
 
 

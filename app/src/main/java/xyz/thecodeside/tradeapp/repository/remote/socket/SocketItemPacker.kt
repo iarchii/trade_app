@@ -2,6 +2,7 @@ package xyz.thecodeside.tradeapp.repository.remote.socket
 
 import android.util.Log
 import com.google.gson.Gson
+import org.json.JSONObject
 import xyz.thecodeside.tradeapp.model.*
 
 class SocketItemPacker {
@@ -11,11 +12,11 @@ class SocketItemPacker {
     fun unpack(message: String?): BaseSocket {
         Log.d(SocketManager.TAG, "messageString = $message")
         val gson = Gson()
-
-        val envelopeAsMap = gson.fromJson(message, Map::class.java)
-        val idString = envelopeAsMap[SOCKET_TOPIC_NAME] as String? ?: throw IllegalArgumentException("Cannot find id of SocketType in: $envelopeAsMap")
+        val json = JSONObject(message)
+        json.has(SOCKET_TOPIC_NAME)
+        val idString = if(json.has(SOCKET_TOPIC_NAME)) json.getString(SOCKET_TOPIC_NAME) else throw IllegalArgumentException("Cannot find id of SocketType in: $json")
         val id = gson.fromJson(idString, SocketType::class.java) ?: throw IllegalArgumentException("No SocketType mapping for given id: $idString")
-        val body =  envelopeAsMap[SOCKET_BODY_NAME].toString()
+        val body =  if(json.has(SOCKET_BODY_NAME)) json.getString(SOCKET_BODY_NAME) else throw IllegalArgumentException("Cannot find body of SocketMessage in: $json")
         val socketBody = gson.fromJson(body , getItemClass(id))
 
         return BaseSocket(id, socketBody)
@@ -24,7 +25,7 @@ class SocketItemPacker {
 }
 private val socketIdMap = mapOf(
         SocketType.CONNECT_CONNECTED to Connected::class.java,
-        SocketType.CONNECT_FAILED to ConnectFailed::class.java,
+        SocketType.CONNECT_FAILED to ResponseError::class.java,
         SocketType.PORTFOLIO_PERFORMANCE to PortfolioPerformance::class.java
 )
 

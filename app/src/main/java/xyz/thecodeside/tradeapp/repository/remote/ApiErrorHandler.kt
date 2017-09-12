@@ -23,8 +23,8 @@ class ApiErrorHandler(val logger: Logger,
         }
     }
 
-    fun getNetworkError(): ResponseError = ResponseError(resource.getString(R.string.network_error))
-    fun getUnknownError(): ResponseError = ResponseError(resource.getString(R.string.unknown_error))
+    fun getNetworkError(): ResponseError = ResponseError(message = resource.getString(R.string.network_error))
+    fun getUnknownError(): ResponseError = ResponseError(message = resource.getString(R.string.unknown_error))
 
     private fun parseError(error: HttpException) : ResponseError {
         try {
