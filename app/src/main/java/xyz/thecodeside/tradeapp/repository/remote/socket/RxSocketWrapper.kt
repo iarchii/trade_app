@@ -6,11 +6,11 @@ import io.reactivex.Single
 import io.reactivex.processors.BehaviorProcessor
 import io.reactivex.processors.PublishProcessor
 import okhttp3.*
-import okio.ByteString
 import xyz.thecodeside.tradeapp.helpers.Logger
 import java.util.concurrent.TimeUnit
 
 class RxSocketWrapper(
+        private val client: OkHttpClient,
         private val logger: Logger,
         private val token: String
 ) {
@@ -21,9 +21,12 @@ class RxSocketWrapper(
     private val AUTHORIZATION_KEY = "Authorization"
     private val AUTH_PREFIX = "Bearer "
 
-    private lateinit var client : OkHttpClient
+    private val RECONNECT_DELAY_MILLISECONDS = 500L
+    private val DISCONNECT_DELAY_MILLISECONDS = 500L
+
 
     private var socket: WebSocket? = null
+
     var status: Status = Status.DISCONNECTED
         set(value) {
             field = value
@@ -49,7 +52,14 @@ class RxSocketWrapper(
     fun observeSocketMessages(): Flowable<String> = messageFlowable
 
     fun disconnect() {
-        socket?.close(NORMAL_CLOSURE_STATUS, NORMAL_CLOSURE_REASON)
+        Single.timer(DISCONNECT_DELAY_MILLISECONDS, TimeUnit.MILLISECONDS)
+                .subscribe({
+                    socket?.close(NORMAL_CLOSURE_STATUS, NORMAL_CLOSURE_REASON)
+                    clear()
+                }, {
+                    logger.logException(it)
+                })
+
     }
 
     fun send(message: String) {
@@ -58,29 +68,32 @@ class RxSocketWrapper(
     }
 
     private fun connectSocket(address: String){
-        client = OkHttpClient()
         val request = Request.Builder()
                 .url(address)
                 .addHeader(AUTHORIZATION_KEY, AUTH_PREFIX + token)
                 .build()
 
-        socket = client.newWebSocket(request, socketClusterListener)
+        socket = client?.newWebSocket(request, socketClusterListener)
 
-        client.dispatcher().executorService().shutdown()
+
     }
 
     private fun reconnect(request: Request?) {
         Single.timer(RECONNECT_DELAY_MILLISECONDS, TimeUnit.MILLISECONDS)
-                .subscribe({ socket = client.newWebSocket(request, socketClusterListener) }, {})
+                .subscribe({
+                    socket = client?.newWebSocket(request, socketClusterListener)
+                },{
+                    logger.logException(it)
+                })
     }
 
-    private val RECONNECT_DELAY_MILLISECONDS = 500L
+
 
     private val socketClusterListener = object: WebSocketListener() {
 
         override fun onOpen(webSocket: WebSocket?, response: Response?) {
             super.onOpen(webSocket, response)
-            status = Status.CONNECTED 
+            status = Status.CONNECTED
         }
 
         override fun onFailure(webSocket: WebSocket?, t: Throwable, response: Response?) {
@@ -88,13 +101,15 @@ class RxSocketWrapper(
             handleError(t)
         }
 
+        override fun onClosing(webSocket: WebSocket?, code: Int, reason: String?) {
+            socket?.close(NORMAL_CLOSURE_STATUS, null)
+            super.onClosing(webSocket, code, reason)
+        }
+
+
         override fun onMessage(webSocket: WebSocket?, text: String?) {
             super.onMessage(webSocket, text)
             messageFlowable.onNext(text)
-        }
-
-        override fun onMessage(webSocket: WebSocket?, bytes: ByteString?) {
-            super.onMessage(webSocket, bytes)
         }
 
         override fun onClosed(webSocket: WebSocket?, code: Int, reason: String?) {
@@ -108,11 +123,11 @@ class RxSocketWrapper(
             clear()
         }
 
-        private fun clear() {
-            socket = null
-            status = Status.DISCONNECTED
-        }
+    }
 
+    private fun clear() {
+        socket = null
+        status = Status.DISCONNECTED
     }
 
     enum class Status {
