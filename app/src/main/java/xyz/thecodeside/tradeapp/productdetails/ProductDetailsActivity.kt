@@ -68,14 +68,20 @@ class ProductDetailsActivity : AppCompatActivity(), ProductDetailsPresenter.Prod
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_product_details)
         TradeApp.baseComponent.inject(this)
-        val product = intent?.getSerializableExtra(PRODUCT_KEY) as Product?
-        presenter.attachView(this, product)
+
     }
 
-    override fun onDestroy() {
-        presenter.detachView()
-        super.onDestroy()
+    override fun onResume() {
+        super.onStart()
+        val product = intent?.getSerializableExtra(PRODUCT_KEY) as Product?
+        presenter.attachView(this, product)
+
     }
+    override fun onPause() {
+        presenter.detachView()
+        super.onPause()
+    }
+
 
 
 }
