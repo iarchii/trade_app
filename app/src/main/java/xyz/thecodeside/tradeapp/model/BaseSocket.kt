@@ -7,7 +7,7 @@ const val SOCKET_BODY_NAME = "t"
 
 open class BaseSocket(
         @SerializedName(SOCKET_TOPIC_NAME)
-        val topic: SocketTopic,
+        val type: SocketType,
         @SerializedName(SOCKET_BODY_NAME)
         val body: BaseSocketBody
 )

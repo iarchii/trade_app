@@ -2,9 +2,12 @@ package xyz.thecodeside.tradeapp.model
 
 import com.google.gson.annotations.SerializedName
 
-enum class SocketTopic {
+enum class SocketType {
     @SerializedName("connect.connected")
-    CONNECTED,
+    CONNECT_CONNECTED,
     @SerializedName("connect.failed")
-    CONNECTED_FAILED
+    CONNECT_FAILED;
+
+    val socketName = name.toLowerCase().replace("_", ".")
+
 }

@@ -4,7 +4,7 @@ import io.reactivex.Completable
 import io.reactivex.Flowable
 import xyz.thecodeside.tradeapp.helpers.Logger
 import xyz.thecodeside.tradeapp.model.BaseSocket
-import xyz.thecodeside.tradeapp.model.SocketTopic
+import xyz.thecodeside.tradeapp.model.SocketType
 import java.util.concurrent.TimeUnit
 
 class SocketManager(private val socketAddress: String,
@@ -49,7 +49,7 @@ class SocketManager(private val socketAddress: String,
     }
 
     private fun isConnectedMessage(it: BaseSocket) =
-            it.topic == SocketTopic.CONNECTED
+            it.type == SocketType.CONNECT_CONNECTED
 
     private fun isConnected() = socket.status == RxSocketWrapper.Status.CONNECTED
 

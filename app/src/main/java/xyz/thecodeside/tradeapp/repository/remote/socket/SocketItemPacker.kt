@@ -8,7 +8,7 @@ class SocketItemPacker {
 
     fun pack(item: BaseSocket): String {
             val gson = Gson()
-            val jsonString = gson.toJson(item, getItemClass(item.topic.name))
+            val jsonString = gson.toJson(item, getItemClass(item.type.name))
             return jsonString
         }
 
@@ -21,13 +21,13 @@ class SocketItemPacker {
 
             val socketBody = gson.fromJson(envelopeAsMap[SOCKET_BODY_NAME] as String? , getItemClass(id))
 
-            return BaseSocket(SocketTopic.valueOf(id), socketBody)
+            return BaseSocket(SocketType.valueOf(id), socketBody)
         }
 
 }
 private val socketIdMap = mapOf(
-        SocketTopic.CONNECTED.name to Connected::class.java,
-        SocketTopic.CONNECTED_FAILED.name to ConnectFailed::class.java
+        SocketType.CONNECT_CONNECTED.socketName to Connected::class.java,
+        SocketType.CONNECT_FAILED.socketName to ConnectFailed::class.java
 )
 
 fun getItemClass(id: String): Class<out BaseSocketBody> = socketIdMap[id] ?: throw IllegalArgumentException("No SocketItem mapping for given id: $id")

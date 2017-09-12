@@ -1,8 +1,6 @@
 package xyz.thecodeside.tradeapp.productdetails
 
-import xyz.thecodeside.tradeapp.helpers.NumberFormatter
-import xyz.thecodeside.tradeapp.helpers.applyTransformerFlowable
-import xyz.thecodeside.tradeapp.helpers.calculateDiff
+import xyz.thecodeside.tradeapp.helpers.*
 import xyz.thecodeside.tradeapp.model.Price
 import xyz.thecodeside.tradeapp.model.Product
 import xyz.thecodeside.tradeapp.model.ResponseError
@@ -17,7 +15,8 @@ class ProductDetailsPresenter
 @Inject
 internal constructor(
         private val apiErrorHandler: ApiErrorHandler,
-        private val socket : SocketManager
+        private val socket : SocketManager,
+        private val logger: Logger
 ) : RxBasePresenter<ProductDetailsPresenter.ProductDetailsView>(){
     interface ProductDetailsView : MvpView {
         fun showError(handleError: ResponseError)
@@ -49,10 +48,19 @@ internal constructor(
         socket.observe()
                 .compose(applyTransformerFlowable())
                 .subscribe({
-
+                    println(it)
                 },{
                   view?.showError(apiErrorHandler.handleError(it))
                 })
+
+        socket.connect()
+                .compose(applyTransformerCompletable())
+                .subscribe({
+                    println("CONNECTED")
+                },{
+                    logger.logException(it)
+                })
+
     }
 
     private fun showProduct(product: Product) {
