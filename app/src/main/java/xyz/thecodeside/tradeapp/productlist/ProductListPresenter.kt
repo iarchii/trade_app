@@ -71,7 +71,7 @@ internal constructor(
                     view?.showProducts(productsList)
                 }, {
                     logger.logException(it)
-                    view?.showError()
+                    view?.showError(apiErrorHandler.handleError(it).message)
                 }).registerInPresenter()
     }
 
@@ -81,7 +81,7 @@ internal constructor(
 
     interface ProductListView : MvpView {
         fun showProducts(productsList: MutableList<Product>)
-        fun showError()
+        fun showError(message: String?)
         fun showProductDetails(product: Product)
         //TODO move it to BaseActivityPresenter.BaseView
         fun getActivity(): Activity

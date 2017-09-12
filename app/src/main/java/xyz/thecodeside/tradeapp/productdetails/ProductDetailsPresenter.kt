@@ -22,7 +22,7 @@ internal constructor(
         private val logger: Logger
 ) : RxBasePresenter<ProductDetailsPresenter.ProductDetailsView>() {
     interface ProductDetailsView : MvpView {
-        fun showError(handleError: ResponseError)
+        fun showError(message: String?)
         fun showClosingPrice(price: String)
         fun showCurrentPrice(price: String)
         fun showProductDetails(displayName: String, symbol: String, securityId: String)
@@ -87,7 +87,7 @@ internal constructor(
         product?.let {
             this.product = product
             showProduct(product)
-        } ?: view?.showError(apiErrorHandler.getUnknownError())
+        } ?: view?.showError(apiErrorHandler.getUnknownError().message)
     }
 
     private fun initMarketOnline(product: Product) {
@@ -110,7 +110,7 @@ internal constructor(
                         SocketType.TRADING_QUOTE -> updateProduct((it.body as TradingQuote))
                     }
                 }, {
-                    view?.showError(apiErrorHandler.handleError(it))
+                    view?.showError(apiErrorHandler.handleError(it).message)
                 }).registerInPresenter()
 
         socket.connect()

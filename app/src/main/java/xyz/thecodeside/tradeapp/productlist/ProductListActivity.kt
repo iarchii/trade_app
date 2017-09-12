@@ -63,8 +63,8 @@ class ProductListActivity : BaseActivity(), ProductListPresenter.ProductListView
         adapter.setProducts(productsList)
     }
 
-    override fun showError() {
-        showToastShort(R.string.unknown_error)
+    override fun showError(message: String?) {
+        showToastShort(message ?: getString(R.string.unknown_error))
     }
 
     override fun showProductDetails(product: Product) {
