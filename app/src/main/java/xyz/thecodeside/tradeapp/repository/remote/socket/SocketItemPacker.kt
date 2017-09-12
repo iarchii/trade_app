@@ -6,12 +6,7 @@ import xyz.thecodeside.tradeapp.model.*
 
 class SocketItemPacker {
 
-    fun pack(item: BaseSocket): String {
-    /*    val gson = Gson()
-        val jsonString = gson.toJson(item, getItemClass(item.type.name))
-        return jsonString*/
-        return ""
-    }
+    fun pack(item: BaseSocket): String = Gson().toJson(item)
 
     fun unpack(message: String?): BaseSocket {
         Log.d(SocketManager.TAG, "messageString = $message")
@@ -34,6 +29,5 @@ private val socketIdMap = mapOf(
 )
 
 fun getItemClass(id: SocketType): Class<out BaseSocketBody> = socketIdMap[id] ?: throw IllegalArgumentException("No SocketType mapping for given id: $id")
-fun getItemId(clazz: Class<out BaseSocketBody>) = socketIdMap.entries.find { it.value == clazz }?.key ?: throw IllegalArgumentException("No id found for the SocketType given")
 
 

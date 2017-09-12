@@ -50,7 +50,7 @@ internal constructor(
                 .compose(applyTransformerFlowable())
                 .subscribe({
                     //TODO
-                    println(it)
+
                 },{
                   view?.showError(apiErrorHandler.handleError(it))
                 })
