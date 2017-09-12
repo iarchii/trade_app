@@ -8,7 +8,7 @@ import xyz.thecodeside.tradeapp.model.Product
 interface RemoteDataSource {
 
     @GET("core/16/products/{productId}")
-    fun getProductDetails(@Path("productId") userId: String): Single<Product>
+    fun getProductDetails(@Path("productId") productId: String): Single<Product>
 
 }
 

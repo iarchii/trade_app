@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="half_circle_item">60dp</dimen>
+    <dimen name="circle_item">120dp</dimen>
+    <dimen name="circle_item_oval">126dp</dimen>
+    <dimen name="item_spacing">10dp</dimen>
+
+    <dimen name="circle_item_text_head">14sp</dimen>
+    <dimen name="details_text_head">30sp</dimen>
+    <dimen name="details_text_label">16sp</dimen>
+
+</resources>

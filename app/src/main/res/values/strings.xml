@@ -3,4 +3,11 @@
 
     <string name="network_error">Network connection error</string>
     <string name="unknown_error">Unknown error</string>
+    <string name="id_format" >#%1$s</string>
+    <string name="current_price">Current price:</string>
+    <string name="closing_price">Closing price:</string>
+    <string name="market_locked">Market is locked</string>
+    <string name="market_offline">Market is offline, try again in few minutes</string>
+    <string name="market_online">Market is online</string>
+    <string name="app_wont_work_offline">This app will not work offline. Please check internet connection.</string>
 </resources>

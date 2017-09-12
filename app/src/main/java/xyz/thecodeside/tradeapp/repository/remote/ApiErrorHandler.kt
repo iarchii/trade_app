@@ -16,24 +16,24 @@ class ApiErrorHandler(val logger: Logger,
 
     fun handleError(exception: Throwable): ResponseError {
         logger.logException(exception)
-        when (exception) {
-            is HttpException -> return parseError(exception)
-            is IOException -> return getNetworkError()
-            else ->return getUnknownError()
+        return when (exception) {
+            is HttpException -> parseError(exception)
+            is IOException -> getNetworkError()
+            else -> getUnknownError()
         }
     }
 
-    private fun getNetworkError(): ResponseError = ResponseError(resource.getString(R.string.network_error))
-    private fun getUnknownError(): ResponseError = ResponseError(resource.getString(R.string.unknown_error))
+    fun getNetworkError(): ResponseError = ResponseError(message = resource.getString(R.string.network_error))
+    fun getUnknownError(): ResponseError = ResponseError(message = resource.getString(R.string.unknown_error))
 
     private fun parseError(error: HttpException) : ResponseError {
-        try {
+        return try {
             val gson = builder.create()
             val responseError = gson.fromJson(error.response().errorBody()?.string(), ResponseError::class.java)
-            return responseError ?: getUnknownError()
+            responseError ?: getUnknownError()
         } catch (e: Exception) {
             logger.logException(Throwable("JSON response could not be converted - data malformed"))
-            return getUnknownError()
+            getUnknownError()
         }
     }
 
