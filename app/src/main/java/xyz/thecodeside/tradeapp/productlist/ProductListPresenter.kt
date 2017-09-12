@@ -53,7 +53,7 @@ internal constructor(
                 }, {
                     logger.logException(it)
                     view?.showError()
-                })
+                }).registerInPresenter()
     }
 
     fun handleProductClick(product: Product) {

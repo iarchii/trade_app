@@ -80,7 +80,7 @@ internal constructor(
                     }
                 },{
                   view?.showError(apiErrorHandler.handleError(it))
-                })
+                }).registerInPresenter()
 
         socket.connect()
                 .compose(applyTransformerFlowable())
@@ -95,7 +95,7 @@ internal constructor(
 
                 },{
                     logger.logException(it)
-                })
+                }).registerInPresenter()
 
     }
 
