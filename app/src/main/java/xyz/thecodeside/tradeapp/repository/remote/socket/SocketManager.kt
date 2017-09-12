@@ -1,12 +1,10 @@
 package xyz.thecodeside.tradeapp.repository.remote.socket
 
-import io.reactivex.Completable
 import io.reactivex.Flowable
 import xyz.thecodeside.tradeapp.helpers.Logger
 import xyz.thecodeside.tradeapp.model.BaseSocket
 import xyz.thecodeside.tradeapp.model.SocketRequest
 import xyz.thecodeside.tradeapp.model.SocketType
-import java.util.concurrent.TimeUnit
 
 class SocketManager(private val socketAddress: String,
                     private val socket: RxSocketWrapper,
@@ -21,8 +19,6 @@ class SocketManager(private val socketAddress: String,
 
     fun connect(): Flowable<RxSocketWrapper.Status> = socket
             .connect(socketAddress)
-            .filter { isReady(it) }
-            .timeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
             .doOnError {
                 disconnect()
             }

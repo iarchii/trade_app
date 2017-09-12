@@ -15,6 +15,21 @@ import xyz.thecodeside.tradeapp.model.ResponseError
 import javax.inject.Inject
 
 class ProductDetailsActivity : AppCompatActivity(), ProductDetailsPresenter.ProductDetailsView {
+    override fun showLockedMarket() {
+        statusIv.setImageResource(R.mipmap.ic_lock)
+        statusTv.setText(R.string.market_locked)
+    }
+
+    override fun showOffline() {
+        statusIv.setImageResource(R.mipmap.ic_offline)
+        statusTv.setText(R.string.market_offline)
+    }
+
+    override fun showOnline() {
+        statusIv.setImageResource(R.mipmap.ic_online)
+        statusTv.setText(R.string.market_online)
+    }
+
     override fun showDiff(calculatedDiff: Float) {
         priceDiffPercentTv.text = NumberFormatter.formatPercent(calculatedDiff)
     }

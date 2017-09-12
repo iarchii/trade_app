@@ -23,7 +23,7 @@ class ProductViewHolder(val clickListener: ProductClickListener,
         val diff = product.calculateDiff()
 
         itemView.productDiffTv.text = NumberFormatter.formatPercent(diff)
-        if(product.productMarketStatus == MarketStatus.OPEN) itemView.lockIv.invisible() else itemView.lockIv.show()
+        if(product.productMarketStatus == MarketStatus.OPEN) itemView.statusIv.invisible() else itemView.statusIv.show()
 
         RxView.clicks(itemView).subscribe({
             clickListener.onClick(product)

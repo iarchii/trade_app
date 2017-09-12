@@ -10,6 +10,7 @@ import xyz.thecodeside.tradeapp.model.*
 import xyz.thecodeside.tradeapp.mvpbase.MvpView
 import xyz.thecodeside.tradeapp.mvpbase.RxBasePresenter
 import xyz.thecodeside.tradeapp.repository.remote.ApiErrorHandler
+import xyz.thecodeside.tradeapp.repository.remote.socket.RxSocketWrapper
 import xyz.thecodeside.tradeapp.repository.remote.socket.SocketManager
 import java.util.*
 import javax.inject.Inject
@@ -27,6 +28,9 @@ internal constructor(
         fun showCurrentPrice(price: String)
         fun showProductDetails(displayName: String, symbol: String, securityId: String)
         fun showDiff(calculatedDiff: Float)
+        fun showLockedMarket()
+        fun showOffline()
+        fun showOnline()
     }
 
     private lateinit var product : Product
@@ -34,6 +38,16 @@ internal constructor(
     fun attachView(mvpView: ProductDetailsView, product: Product?) {
         super.attachView(mvpView)
         handleProduct(product)
+    }
+
+    override fun detachView() {
+        unsubscribeProduct()
+        socket.disconnect()
+
+        super.detachView()
+    }
+
+    fun unsubscribeProduct(){
 
     }
 
@@ -43,18 +57,25 @@ internal constructor(
         } else {
             this.product = product
             showProduct(product)
-            initSocket()
+            if(isMarketLocked(product.productMarketStatus)){
+                view?.showLockedMarket()
+            }else{
+                initSocket()
+            }
 
         }
     }
 
+    private fun isMarketLocked(productMarketStatus: MarketStatus): Boolean = productMarketStatus == MarketStatus.CLOSED
+
     private fun initSocket() {
+        view?.showOffline()
         socket.observe()
                 .compose(applyTransformerFlowable())
                 .subscribe({
                    Log.d(SocketManager.TAG, "Message object = ${Gson().toJson(it)}")
                     when(it.type){
-                        SocketType.TRADING_QUOTE -> updateProduct((it.body as TradingQuote).currentPrice)
+                        SocketType.TRADING_QUOTE -> updateProduct((it.body as TradingQuote))
                     }
                 },{
                   view?.showError(apiErrorHandler.handleError(it))
@@ -63,17 +84,25 @@ internal constructor(
         socket.connect()
                 .compose(applyTransformerFlowable())
                 .subscribe({
-                    Log.d(SocketManager.TAG, "CONNECTED & READY")
-                    observeProduct(product.securityId)
+                    when(it){
+                        RxSocketWrapper.Status.READY -> {
+                            view?.showOnline()
+                            observeProduct(product.securityId)
+                        }
+                        else -> view?.showOffline()
+                    }
+
                 },{
                     logger.logException(it)
                 })
 
     }
 
-    private fun updateProduct(updatedPrice: Float) {
-        product.currentPrice.amount = updatedPrice
-        showCurrentPrice(product)
+    private fun updateProduct(updatedProduct: TradingQuote) {
+        if(updatedProduct.securityId.equals(product.securityId)){
+            product.currentPrice.amount = updatedProduct.currentPrice
+            showCurrentPrice(product)
+        }
     }
 
     private fun observeProduct(id: String){
@@ -86,7 +115,6 @@ internal constructor(
     private fun showProduct(product: Product) {
         view?.showProductDetails(product.displayName, product.symbol, product.securityId)
         view?.showClosingPrice(formatPrice(product.closingPrice))
-
         showCurrentPrice(product)
     }
 
