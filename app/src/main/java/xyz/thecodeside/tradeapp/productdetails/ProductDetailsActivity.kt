@@ -1,12 +1,13 @@
 package xyz.thecodeside.tradeapp.productdetails
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_product_details.*
 import xyz.thecodeside.tradeapp.R
 import xyz.thecodeside.tradeapp.TradeApp
+import xyz.thecodeside.tradeapp.base.BaseActivity
 import xyz.thecodeside.tradeapp.helpers.NumberFormatter
 import xyz.thecodeside.tradeapp.helpers.showToastShort
 
@@ -14,18 +15,28 @@ import xyz.thecodeside.tradeapp.model.Product
 import xyz.thecodeside.tradeapp.model.ResponseError
 import javax.inject.Inject
 
-class ProductDetailsActivity : AppCompatActivity(), ProductDetailsPresenter.ProductDetailsView {
+class ProductDetailsActivity : BaseActivity(), ProductDetailsPresenter.ProductDetailsView {
+    override fun showOnline() {
+        hideOfflineMessage()
+    }
+
+    override fun showOffline() {
+        showOfflineMessage(findViewById(android.R.id.content))
+    }
+
+    override fun getActivity(): Activity = this
+
     override fun showLockedMarket() {
         statusIv.setImageResource(R.mipmap.ic_lock)
         statusTv.setText(R.string.market_locked)
     }
 
-    override fun showOffline() {
+    override fun showOfflineMarket() {
         statusIv.setImageResource(R.mipmap.ic_offline)
         statusTv.setText(R.string.market_offline)
     }
 
-    override fun showOnline() {
+    override fun showOnlineMarket() {
         statusIv.setImageResource(R.mipmap.ic_online)
         statusTv.setText(R.string.market_online)
     }

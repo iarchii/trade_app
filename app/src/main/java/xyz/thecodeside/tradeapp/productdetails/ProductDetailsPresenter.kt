@@ -1,11 +1,9 @@
 package xyz.thecodeside.tradeapp.productdetails
 
+import android.app.Activity
 import android.util.Log
 import com.google.gson.Gson
-import xyz.thecodeside.tradeapp.helpers.Logger
-import xyz.thecodeside.tradeapp.helpers.NumberFormatter
-import xyz.thecodeside.tradeapp.helpers.applyTransformerFlowable
-import xyz.thecodeside.tradeapp.helpers.calculateDiff
+import xyz.thecodeside.tradeapp.helpers.*
 import xyz.thecodeside.tradeapp.model.*
 import xyz.thecodeside.tradeapp.mvpbase.MvpView
 import xyz.thecodeside.tradeapp.mvpbase.RxBasePresenter
@@ -19,9 +17,10 @@ class ProductDetailsPresenter
 @Inject
 internal constructor(
         private val apiErrorHandler: ApiErrorHandler,
-        private val socket : SocketManager,
+        private val socket: SocketManager,
+        private val connectionManager: InternetConnectionManager,
         private val logger: Logger
-) : RxBasePresenter<ProductDetailsPresenter.ProductDetailsView>(){
+) : RxBasePresenter<ProductDetailsPresenter.ProductDetailsView>() {
     interface ProductDetailsView : MvpView {
         fun showError(handleError: ResponseError)
         fun showClosingPrice(price: String)
@@ -29,25 +28,57 @@ internal constructor(
         fun showProductDetails(displayName: String, symbol: String, securityId: String)
         fun showDiff(calculatedDiff: Float)
         fun showLockedMarket()
-        fun showOffline()
+        fun showOfflineMarket()
+        fun showOnlineMarket()
+        //TODO better way to handle Receivers?
+        fun getActivity(): Activity
         fun showOnline()
+        fun showOffline()
     }
 
-    private lateinit var product : Product
+    private lateinit var product: Product
 
     fun attachView(mvpView: ProductDetailsView, product: Product?) {
         super.attachView(mvpView)
+        init(product)
+    }
+
+    private fun init(product: Product?) {
         handleProduct(product)
+        connectionManager.observe(view?.getActivity())
+                .subscribe({
+                    handleNetworkState(it)
+                },{
+                    logger.logException(it)
+                    handleNetworkState(InternetConnectionManager.Status.OFFLINE)
+                })
+                .registerInPresenter()
+    }
+
+    private fun handleNetworkState(it: InternetConnectionManager.Status?) {
+        when(it){
+            InternetConnectionManager.Status.ONLINE ->{
+                view?.showOnline()
+                initMarketOnline(product)
+            }
+            InternetConnectionManager.Status.OFFLINE ->{
+                view?.showOffline()
+            }
+        }
     }
 
     override fun detachView() {
-        unsubscribeProduct(product.securityId)
-        socket.disconnect()
-
+        clean()
         super.detachView()
     }
 
-    private fun unsubscribeProduct(id: String){
+    private fun clean() {
+        connectionManager.stopObserve(view?.getActivity())
+        unsubscribeProduct(product.securityId)
+        socket.disconnect()
+    }
+
+    private fun unsubscribeProduct(id: String) {
         val request = SocketRequest(unsubscribeProduct = listOf(SubscriptionProduct(id)))
         socket.send(request)
     }
@@ -58,59 +89,60 @@ internal constructor(
         } else {
             this.product = product
             showProduct(product)
-            if(isMarketLocked(product.productMarketStatus)){
-                view?.showLockedMarket()
-            }else{
-                initSocket()
-            }
+        }
+    }
 
+    private fun initMarketOnline(product: Product) {
+        if (isMarketLocked(product.productMarketStatus)) {
+            view?.showLockedMarket()
+        } else {
+            initSocket()
         }
     }
 
     private fun isMarketLocked(productMarketStatus: MarketStatus): Boolean = productMarketStatus == MarketStatus.CLOSED
 
     private fun initSocket() {
-        view?.showOffline()
+        view?.showOfflineMarket()
         socket.observe()
                 .compose(applyTransformerFlowable())
                 .subscribe({
-                   Log.d(SocketManager.TAG, "Message object = ${Gson().toJson(it)}")
-                    when(it.type){
+                    Log.d(SocketManager.TAG, "Message object = ${Gson().toJson(it)}")
+                    when (it.type) {
                         SocketType.TRADING_QUOTE -> updateProduct((it.body as TradingQuote))
                     }
-                },{
-                  view?.showError(apiErrorHandler.handleError(it))
+                }, {
+                    view?.showError(apiErrorHandler.handleError(it))
                 }).registerInPresenter()
 
         socket.connect()
                 .compose(applyTransformerFlowable())
                 .subscribe({
-                    when(it){
+                    when (it) {
                         RxSocketWrapper.Status.READY -> {
-                            view?.showOnline()
+                            view?.showOnlineMarket()
                             observeProduct(product.securityId)
                         }
-                        else -> view?.showOffline()
+                        else -> view?.showOfflineMarket()
                     }
 
-                },{
+                }, {
                     logger.logException(it)
                 }).registerInPresenter()
 
     }
 
     private fun updateProduct(updatedProduct: TradingQuote) {
-        if(updatedProduct.securityId.equals(product.securityId)){
+        if (updatedProduct.securityId.equals(product.securityId)) {
             product.currentPrice.amount = updatedProduct.currentPrice
             showCurrentPrice(product)
         }
     }
 
-    private fun observeProduct(id: String){
+    private fun observeProduct(id: String) {
         val request = SocketRequest(subscribeProduct = listOf(SubscriptionProduct(id)))
         socket.send(request)
     }
-
 
 
     private fun showProduct(product: Product) {
@@ -127,7 +159,7 @@ internal constructor(
     private fun formatPrice(price: Price): String {
         val formattedValue = NumberFormatter.format(price.amount, price.decimals)
         val currency = Currency.getInstance(price.currency)
-        return  "${currency.symbol}$formattedValue"
+        return "${currency.symbol}$formattedValue"
     }
 
 

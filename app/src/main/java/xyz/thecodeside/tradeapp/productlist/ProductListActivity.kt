@@ -1,17 +1,28 @@
 package xyz.thecodeside.tradeapp.productlist
 
+import android.app.Activity
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.GridLayoutManager
 import kotlinx.android.synthetic.main.activity_product_list.*
 import xyz.thecodeside.tradeapp.R
 import xyz.thecodeside.tradeapp.TradeApp
+import xyz.thecodeside.tradeapp.base.BaseActivity
 import xyz.thecodeside.tradeapp.helpers.showToastShort
 import xyz.thecodeside.tradeapp.model.Product
 import xyz.thecodeside.tradeapp.productdetails.ProductDetailsActivity
 import javax.inject.Inject
 
-class ProductListActivity : AppCompatActivity(), ProductListPresenter.ProductListView {
+class ProductListActivity : BaseActivity(), ProductListPresenter.ProductListView {
+
+    override fun getActivity(): Activity = this
+
+    override fun showOnline() {
+        hideOfflineMessage()
+    }
+
+    override fun showOffline() {
+        showOfflineMessage(findViewById(android.R.id.content))
+    }
 
     @Inject lateinit var presenter: ProductListPresenter
     var adapter: ProductListAdapter = ProductListAdapter()
