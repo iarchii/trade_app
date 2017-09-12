@@ -11,6 +11,7 @@ import xyz.thecodeside.tradeapp.repository.remote.ApiErrorHandler
 import xyz.thecodeside.tradeapp.repository.remote.socket.RxSocketWrapper
 import xyz.thecodeside.tradeapp.repository.remote.socket.SocketManager
 import java.util.*
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class ProductDetailsPresenter
@@ -36,6 +37,7 @@ internal constructor(
         fun showOffline()
     }
 
+    private val MESSAGE_SAMPLING_MILLISECONDS = 100L
     private lateinit var product: Product
 
     fun attachView(mvpView: ProductDetailsView, product: Product?) {
@@ -102,17 +104,13 @@ internal constructor(
 
     private fun initSocket() {
         view?.showOfflineMarket()
-        socket.observe()
-                .compose(applyTransformerFlowable())
-                .subscribe({
-                    Log.d(SocketManager.TAG, "Message object = ${Gson().toJson(it)}")
-                    when (it.type) {
-                        SocketType.TRADING_QUOTE -> updateProduct((it.body as TradingQuote))
-                    }
-                }, {
-                    view?.showError(apiErrorHandler.handleError(it).message)
-                }).registerInPresenter()
+        observeSocketMessages()
 
+        connectToSocket()
+
+    }
+
+    private fun connectToSocket() {
         socket.connect()
                 .compose(applyTransformerFlowable())
                 .subscribe({
@@ -127,11 +125,24 @@ internal constructor(
                 }, {
                     logger.logException(it)
                 }).registerInPresenter()
+    }
 
+    private fun observeSocketMessages() {
+        socket.observe()
+                .sample(MESSAGE_SAMPLING_MILLISECONDS, TimeUnit.MILLISECONDS)
+                .compose(applyTransformerFlowable())
+                .subscribe({
+                    Log.d(SocketManager.TAG, "Message object = ${Gson().toJson(it)}")
+                    when (it.type) {
+                        SocketType.TRADING_QUOTE -> updateProduct((it.body as TradingQuote))
+                    }
+                }, {
+                    view?.showError(apiErrorHandler.handleError(it).message)
+                }).registerInPresenter()
     }
 
     private fun updateProduct(updatedProduct: TradingQuote) {
-        if (updatedProduct.securityId.equals(product.securityId)) {
+        if (updatedProduct.securityId == product.securityId) {
             product.currentPrice.amount = updatedProduct.currentPrice
             showCurrentPrice(product)
         }
