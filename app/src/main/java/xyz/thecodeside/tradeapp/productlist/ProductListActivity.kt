@@ -4,15 +4,21 @@ import android.app.Activity
 import android.os.Bundle
 import android.support.v7.widget.GridLayoutManager
 import kotlinx.android.synthetic.main.activity_product_list.*
+import kotlinx.android.synthetic.main.progress_overlay.*
 import xyz.thecodeside.tradeapp.R
 import xyz.thecodeside.tradeapp.TradeApp
 import xyz.thecodeside.tradeapp.base.BaseActivity
+import xyz.thecodeside.tradeapp.helpers.hide
+import xyz.thecodeside.tradeapp.helpers.show
 import xyz.thecodeside.tradeapp.helpers.showToastShort
 import xyz.thecodeside.tradeapp.model.Product
 import xyz.thecodeside.tradeapp.productdetails.ProductDetailsActivity
 import javax.inject.Inject
 
 class ProductListActivity : BaseActivity(), ProductListPresenter.ProductListView {
+    override fun showProgress() {
+        progressOverlay.show()
+    }
 
     override fun getActivity(): Activity = this
 
@@ -60,6 +66,7 @@ class ProductListActivity : BaseActivity(), ProductListPresenter.ProductListView
     }
 
     override fun showProducts(productsList: MutableList<Product>) {
+        progressOverlay.hide()
         adapter.setProducts(productsList)
     }
 

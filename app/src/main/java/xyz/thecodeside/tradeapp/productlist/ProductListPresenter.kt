@@ -53,6 +53,7 @@ internal constructor(
     }
 
     private fun loadProducts() {
+        view?.showProgress()
         productsList.clear()
         Flowable.fromIterable(productsIds.values)
                 .observeOn(Schedulers.io())
@@ -87,6 +88,7 @@ internal constructor(
         fun getActivity(): Activity
         fun showOnline()
         fun showOffline()
+        fun showProgress()
     }
 
 }
