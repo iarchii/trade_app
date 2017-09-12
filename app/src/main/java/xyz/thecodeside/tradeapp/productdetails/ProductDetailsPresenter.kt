@@ -1,8 +1,6 @@
 package xyz.thecodeside.tradeapp.productdetails
 
 import android.app.Activity
-import android.util.Log
-import com.google.gson.Gson
 import xyz.thecodeside.tradeapp.helpers.*
 import xyz.thecodeside.tradeapp.model.*
 import xyz.thecodeside.tradeapp.mvpbase.MvpView
@@ -33,6 +31,7 @@ internal constructor(
         fun showOnlineMarket()
         //TODO better way to handle Receivers?
         fun getActivity(): Activity
+
         fun showOnline()
         fun showOffline()
     }
@@ -50,7 +49,7 @@ internal constructor(
         connectionManager.observe(view?.getActivity())
                 .subscribe({
                     handleNetworkState(it)
-                },{
+                }, {
                     logger.logException(it)
                     handleNetworkState(InternetConnectionManager.Status.OFFLINE)
                 })
@@ -58,12 +57,12 @@ internal constructor(
     }
 
     private fun handleNetworkState(it: InternetConnectionManager.Status?) {
-        when(it){
-            InternetConnectionManager.Status.ONLINE ->{
+        when (it) {
+            InternetConnectionManager.Status.ONLINE -> {
                 view?.showOnline()
                 initMarketOnline(product)
             }
-            InternetConnectionManager.Status.OFFLINE ->{
+            InternetConnectionManager.Status.OFFLINE -> {
                 view?.showOffline()
             }
         }
@@ -129,13 +128,11 @@ internal constructor(
 
     private fun observeSocketMessages() {
         socket.observe()
+                .filter { it.type == SocketType.TRADING_QUOTE }
                 .sample(MESSAGE_SAMPLING_MILLISECONDS, TimeUnit.MILLISECONDS)
                 .compose(applyTransformerFlowable())
                 .subscribe({
-                    Log.d(SocketManager.TAG, "Message object = ${Gson().toJson(it)}")
-                    when (it.type) {
-                        SocketType.TRADING_QUOTE -> updateProduct((it.body as TradingQuote))
-                    }
+                    updateProduct((it.body as TradingQuote))
                 }, {
                     view?.showError(apiErrorHandler.handleError(it).message)
                 }).registerInPresenter()
