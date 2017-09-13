@@ -29,7 +29,7 @@ internal constructor(
         fun showLockedMarket()
         fun showOfflineMarket()
         fun showOnlineMarket()
-        //TODO better way to handle Receivers?
+        //TODO better way to handle Receivers? should be registered as separete presenter method registerReceiver(activity)
         fun getActivity(): Activity
 
         fun showOnline()
