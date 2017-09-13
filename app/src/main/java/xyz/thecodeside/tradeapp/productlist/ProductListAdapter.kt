@@ -8,7 +8,7 @@ import xyz.thecodeside.tradeapp.model.Product
 
 class ProductListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    val products: MutableList<Product> = mutableListOf()
+    private val products: MutableList<Product> = mutableListOf()
     lateinit var clickListener: ProductClickListener
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -16,9 +16,8 @@ class ProductListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         return ProductViewHolder(clickListener, inflater.inflate(R.layout.circle_item_view, parent, false))
     }
 
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder?, position: Int) {
-        (holder as ProductViewHolder).bind(products[position])
-    }
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder?, position: Int) =
+            (holder as ProductViewHolder).bind(products[position])
 
     override fun getItemCount(): Int = products.size
 

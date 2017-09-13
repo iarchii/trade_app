@@ -15,9 +15,7 @@ class InternetConnectionManager @Inject internal constructor(
     private val connectionState : BehaviorProcessor<Status> = BehaviorProcessor.create()
 
     private val onConnectionChanged : OnConnectionChanged = object : OnConnectionChanged{
-        override fun onChange() {
-            connectionState.onNext(isOnline())
-        }
+        override fun onChange() = connectionState.onNext(isOnline())
 
     }
     private val receiver = InternetConnectionReceiver(onConnectionChanged)

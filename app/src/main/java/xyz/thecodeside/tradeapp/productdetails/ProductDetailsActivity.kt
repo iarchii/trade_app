@@ -10,18 +10,14 @@ import xyz.thecodeside.tradeapp.TradeApp
 import xyz.thecodeside.tradeapp.base.BaseActivity
 import xyz.thecodeside.tradeapp.helpers.NumberFormatter
 import xyz.thecodeside.tradeapp.helpers.showToastShort
-
 import xyz.thecodeside.tradeapp.model.Product
-import xyz.thecodeside.tradeapp.model.ResponseError
 import javax.inject.Inject
 
 class ProductDetailsActivity : BaseActivity(), ProductDetailsPresenter.ProductDetailsView {
-    override fun showOnline() {
-        hideOfflineMessage()
-    }
+    override fun showOnline() = hideOfflineMessage()
 
     override fun showOffline() {
-        showOfflineMessage(findViewById(android.R.id.content))
+        showOfflineMessage(rootView = findViewById(android.R.id.content))
     }
 
     override fun getActivity(): Activity = this
@@ -59,10 +55,8 @@ class ProductDetailsActivity : BaseActivity(), ProductDetailsPresenter.ProductDe
         currentPriceTv.text = price
     }
 
-    override fun showError(handleError: ResponseError) {
-        //TODO Better error handling
-        showToastShort(handleError.message ?: getString(R.string.unknown_error))
-    }
+    override fun showError(message : String?) =
+            showToastShort(message ?: getString(R.string.unknown_error))
 
     companion object {
         private const val PRODUCT_KEY = "PRODUCT_KEY"

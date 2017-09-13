@@ -1,8 +1,6 @@
 package xyz.thecodeside.tradeapp.productdetails
 
 import android.app.Activity
-import android.util.Log
-import com.google.gson.Gson
 import xyz.thecodeside.tradeapp.helpers.*
 import xyz.thecodeside.tradeapp.model.*
 import xyz.thecodeside.tradeapp.mvpbase.MvpView
@@ -11,6 +9,7 @@ import xyz.thecodeside.tradeapp.repository.remote.ApiErrorHandler
 import xyz.thecodeside.tradeapp.repository.remote.socket.RxSocketWrapper
 import xyz.thecodeside.tradeapp.repository.remote.socket.SocketManager
 import java.util.*
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class ProductDetailsPresenter
@@ -22,7 +21,7 @@ internal constructor(
         private val logger: Logger
 ) : RxBasePresenter<ProductDetailsPresenter.ProductDetailsView>() {
     interface ProductDetailsView : MvpView {
-        fun showError(handleError: ResponseError)
+        fun showError(message: String?)
         fun showClosingPrice(price: String)
         fun showCurrentPrice(price: String)
         fun showProductDetails(displayName: String, symbol: String, securityId: String)
@@ -32,10 +31,12 @@ internal constructor(
         fun showOnlineMarket()
         //TODO better way to handle Receivers?
         fun getActivity(): Activity
+
         fun showOnline()
         fun showOffline()
     }
 
+    private val MESSAGE_SAMPLING_MILLISECONDS = 100L
     private lateinit var product: Product
 
     fun attachView(mvpView: ProductDetailsView, product: Product?) {
@@ -48,7 +49,7 @@ internal constructor(
         connectionManager.observe(view?.getActivity())
                 .subscribe({
                     handleNetworkState(it)
-                },{
+                }, {
                     logger.logException(it)
                     handleNetworkState(InternetConnectionManager.Status.OFFLINE)
                 })
@@ -56,12 +57,12 @@ internal constructor(
     }
 
     private fun handleNetworkState(it: InternetConnectionManager.Status?) {
-        when(it){
-            InternetConnectionManager.Status.ONLINE ->{
+        when (it) {
+            InternetConnectionManager.Status.ONLINE -> {
                 view?.showOnline()
                 initMarketOnline(product)
             }
-            InternetConnectionManager.Status.OFFLINE ->{
+            InternetConnectionManager.Status.OFFLINE -> {
                 view?.showOffline()
             }
         }
@@ -87,7 +88,7 @@ internal constructor(
         product?.let {
             this.product = product
             showProduct(product)
-        } ?: view?.showError(apiErrorHandler.getUnknownError())
+        } ?: view?.showError(apiErrorHandler.getUnknownError().message)
     }
 
     private fun initMarketOnline(product: Product) {
@@ -102,17 +103,13 @@ internal constructor(
 
     private fun initSocket() {
         view?.showOfflineMarket()
-        socket.observe()
-                .compose(applyTransformerFlowable())
-                .subscribe({
-                    Log.d(SocketManager.TAG, "Message object = ${Gson().toJson(it)}")
-                    when (it.type) {
-                        SocketType.TRADING_QUOTE -> updateProduct((it.body as TradingQuote))
-                    }
-                }, {
-                    view?.showError(apiErrorHandler.handleError(it))
-                }).registerInPresenter()
+        observeSocketMessages()
 
+        connectToSocket()
+
+    }
+
+    private fun connectToSocket() {
         socket.connect()
                 .compose(applyTransformerFlowable())
                 .subscribe({
@@ -127,11 +124,22 @@ internal constructor(
                 }, {
                     logger.logException(it)
                 }).registerInPresenter()
+    }
 
+    private fun observeSocketMessages() {
+        socket.observe()
+                .filter { it.type == SocketType.TRADING_QUOTE }
+                .sample(MESSAGE_SAMPLING_MILLISECONDS, TimeUnit.MILLISECONDS)
+                .compose(applyTransformerFlowable())
+                .subscribe({
+                    updateProduct((it.body as TradingQuote))
+                }, {
+                    view?.showError(apiErrorHandler.handleError(it).message)
+                }).registerInPresenter()
     }
 
     private fun updateProduct(updatedProduct: TradingQuote) {
-        if (updatedProduct.securityId.equals(product.securityId)) {
+        if (updatedProduct.securityId == product.securityId) {
             product.currentPrice.amount = updatedProduct.currentPrice
             showCurrentPrice(product)
         }

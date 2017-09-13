@@ -15,8 +15,6 @@ class SocketManager(private val socketAddress: String,
         const val TAG = "SOCKET"
     }
 
-    private val TIMEOUT_SECONDS = 4L
-
     fun connect(): Flowable<RxSocketWrapper.Status> = socket
             .connect(socketAddress)
             .doOnError {
@@ -29,9 +27,7 @@ class SocketManager(private val socketAddress: String,
 
     fun disconnect() = socket.disconnect()
 
-    fun send(item: SocketRequest) {
-        socket.send(packer.pack(item))
-    }
+    fun send(item: SocketRequest) = socket.send(packer.pack(item))
 
     fun observe(): Flowable<BaseSocket> = socket
             .observeSocketMessages()
@@ -51,14 +47,6 @@ class SocketManager(private val socketAddress: String,
             it.type == SocketType.CONNECT_CONNECTED
 
     private fun isConnected() = socket.status == RxSocketWrapper.Status.CONNECTED
-
-
-    @Suppress("UNCHECKED_CAST")
-    fun <T : BaseSocket> observe(clazz: Class<T>): Flowable<T> = observe()
-            .filter { it.javaClass == clazz }
-            .map {
-                it as T
-            }
 
     fun unpackItem(envelope: String?): Flowable<BaseSocket> = Flowable
             .fromCallable { (packer.unpack(envelope)) }
